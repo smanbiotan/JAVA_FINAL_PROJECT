@@ -1,4 +1,10 @@
 # Clinic Appointment System
 
-The Clinic Appointment System is a Java-based application designed to help manage clinic appointments, patient information, and doctor schedules. It provides a simple and organized way to schedule, view, update, and manage appointments while keeping important patient and doctor records accessible. The project demonstrates the use of Java programming and Object-Oriented Programming (OOP) concepts to develop a practical real-world system.
+A Java-based clinic appointment system for managing patients, doctors, schedules, and appointments.
 
+### AI Automation Features
+- 📅 Automatically schedules appointments in a calendar
+- 🔔 Sends appointment reminders to patients
+- 🔄 Automates appointment updates and notifications
+
+Built using **Java, OOP, and AI Automation**.
