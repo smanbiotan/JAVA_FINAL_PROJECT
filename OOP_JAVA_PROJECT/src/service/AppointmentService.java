@@ -159,18 +159,23 @@ public class AppointmentService {
             );
         }
 
+        // Check if the new schedule is already occupied
         for (Appointment existing : appointments) {
 
             if (!existing.getAppointmentId()
                     .equalsIgnoreCase(id)
+
                     && existing.getDoctor()
                     .getId()
                     .equalsIgnoreCase(
                             appointment.getDoctor().getId())
+
                     && existing.getDate()
                     .equals(newDate)
+
                     && existing.getTime()
                     .equals(newTime)
+
                     && existing.getStatus()
                     .equals("CONFIRMED")) {
 
@@ -180,8 +185,12 @@ public class AppointmentService {
             }
         }
 
+        // Update appointment date and time
         appointment.setDate(newDate);
         appointment.setTime(newTime);
+
+        // Update status
+        appointment.setStatus("RESCHEDULED");
 
         System.out.println(
                 "Appointment rescheduled successfully."
