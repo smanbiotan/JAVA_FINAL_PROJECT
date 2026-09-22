@@ -60,19 +60,12 @@ public class Main {
                     saveData();
 
                     System.out.println(
-                            "\nThank you for using "
-                                    + "Clinic Appointment "
-                                    + "Management System."
-                    );
-
+                            "\nThank you for using " + "Clinic Appointment " + "Management System.");
                     break;
 
                 default:
 
-                    System.out.println(
-                            "Invalid choice. "
-                                    + "Please try again."
-                    );
+                    System.out.println("Invalid choice. " + "Please try again.");
             }
 
         } while (choice != 0);
@@ -80,9 +73,7 @@ public class Main {
         scanner.close();
     }
 
-    // =====================================================
     // MAIN MENU
-    // =====================================================
 
     private static void displayMainMenu() {
 
@@ -99,9 +90,7 @@ public class Main {
         System.out.println("0. Exit");
     }
 
-    // =====================================================
     // PATIENT MENU
-    // =====================================================
 
     private static void patientMenu() {
 
@@ -110,8 +99,7 @@ public class Main {
         do {
 
             System.out.println(
-                    "\n========== PATIENT MANAGEMENT =========="
-            );
+                    "\n========== PATIENT MANAGEMENT ==========");
 
             System.out.println("1. Add Patient");
             System.out.println("2. View All Patients");
@@ -146,14 +134,12 @@ public class Main {
 
                     default:
                         System.out.println(
-                                "Invalid choice."
-                        );
+                                "Invalid choice.");
                 }
 
             } catch (Exception e) {
 
-                System.out.println("Error: " + e.getMessage()
-                );
+                System.out.println("Error: " + e.getMessage());
             }
 
         } while (choice != 0);
@@ -163,46 +149,35 @@ public class Main {
 
         System.out.println("\n===== ADD PATIENT =====");
 
-        String id =
-                readRequiredString("Patient ID: ");
+        String id = readRequiredString("Patient ID: ");
 
-        String name =
-                readRequiredString("Name: ");
+        String name = readRequiredString("Name: ");
 
-        String phone =
-                readRequiredString("Phone: ");
+        String phone = readRequiredString("Phone: ");
 
-        String email =
-                readRequiredString("Email: ");
+        String email = readRequiredString("Email: ");
 
-        int age =
-                readInt("Age: ");
+        int age = readInt("Age: ");
 
         if (age <= 0) {
 
-            System.out.println(
-                    "Age must be greater than zero."
-            );
+            System.out.println("Age must be greater than zero.");
 
             return;
         }
 
-        String gender =
-                readRequiredString("Gender: ");
+        String gender = readRequiredString("Gender: ");
 
-        String address =
-                readRequiredString("Address: ");
+        String address = readRequiredString("Address: ");
 
-        Patient patient =
-                new Patient(
-                        id,
-                        name,
-                        phone,
-                        email,
-                        age,
-                        gender,
-                        address
-                );
+        Patient patient = new Patient(
+                id,
+                name,
+                phone,
+                email,
+                age,
+                gender,
+                address);
 
         patientService.addPatient(patient);
     }
@@ -211,62 +186,43 @@ public class Main {
 
         System.out.println("\n===== ALL PATIENTS =====");
 
-        if (patientService
-                .getAllPatients()
-                .isEmpty()) {
+        if (patientService.getAllPatients().isEmpty()) {
 
-            System.out.println(
-                    "No patients found."
-            );
+            System.out.println("No patients found.");
 
             return;
         }
 
-        for (Patient patient :
-                patientService.getAllPatients()) {
+        for (Patient patient : patientService.getAllPatients()) {
 
-            System.out.println(
-                    "\n" + patient
-            );
+            System.out.println("\n" + patient);
         }
     }
 
-    private static void updatePatient()
-            throws PatientNotFoundException {
+    private static void updatePatient() throws PatientNotFoundException {
 
-        System.out.println(
-                "\n===== UPDATE PATIENT ====="
-        );
+        System.out.println("\n===== UPDATE PATIENT =====");
 
-        String id =
-                readRequiredString("Patient ID: ");
+        String id = readRequiredString("Patient ID: ");
 
-        String name =
-                readRequiredString("New name: ");
+        String name = readRequiredString("New name: ");
 
-        String phone =
-                readRequiredString("New phone: ");
+        String phone = readRequiredString("New phone: ");
 
-        String email =
-                readRequiredString("New email: ");
+        String email = readRequiredString("New email: ");
 
-        int age =
-                readInt("New age: ");
+        int age = readInt("New age: ");
 
         if (age <= 0) {
 
-            System.out.println(
-                    "Age must be greater than zero."
-            );
+            System.out.println("Age must be greater than zero.");
 
             return;
         }
 
-        String gender =
-                readRequiredString("New gender: ");
+        String gender = readRequiredString("New gender: ");
 
-        String address =
-                readRequiredString("New address: ");
+        String address = readRequiredString("New address: ");
 
         patientService.updatePatient(
                 id,
@@ -275,26 +231,19 @@ public class Main {
                 email,
                 age,
                 gender,
-                address
-        );
+                address);
     }
 
-    private static void deletePatient()
-            throws PatientNotFoundException {
+    private static void deletePatient() throws PatientNotFoundException {
 
-        System.out.println(
-                "\n===== DELETE PATIENT ====="
-        );
+        System.out.println("\n===== DELETE PATIENT =====");
 
-        String id =
-                readRequiredString("Patient ID: ");
+        String id = readRequiredString("Patient ID: ");
 
         patientService.deletePatient(id);
     }
 
-    // =====================================================
     // DOCTOR MENU
-    // =====================================================
 
     private static void doctorMenu() {
 
@@ -302,9 +251,7 @@ public class Main {
 
         do {
 
-            System.out.println(
-                    "\n========== DOCTOR MANAGEMENT =========="
-            );
+            System.out.println("\n========== DOCTOR MANAGEMENT ==========");
 
             System.out.println("1. Add Doctor");
             System.out.println("2. View All Doctors");
@@ -338,16 +285,12 @@ public class Main {
                         break;
 
                     default:
-                        System.out.println(
-                                "Invalid choice."
-                        );
+                        System.out.println("Invalid choice.");
                 }
 
             } catch (Exception e) {
 
-                System.out.println(
-                        "Error: " + e.getMessage()
-                );
+                System.out.println("Error: " + e.getMessage());
             }
 
         } while (choice != 0);
@@ -357,29 +300,22 @@ public class Main {
 
         System.out.println("\n===== ADD DOCTOR =====");
 
-        String id =
-                readRequiredString("Doctor ID: ");
+        String id = readRequiredString("Doctor ID: ");
 
-        String name =
-                readRequiredString("Name: ");
+        String name = readRequiredString("Name: ");
 
-        String phone =
-                readRequiredString("Phone: ");
+        String phone = readRequiredString("Phone: ");
 
-        String email =
-                readRequiredString("Email: ");
+        String email = readRequiredString("Email: ");
 
-        String specialization =
-                readRequiredString("Specialization: ");
+        String specialization = readRequiredString("Specialization: ");
 
-        Doctor doctor =
-                new Doctor(
-                        id,
-                        name,
-                        phone,
-                        email,
-                        specialization
-                );
+        Doctor doctor = new Doctor(
+                id,
+                name,
+                phone,
+                email,
+                specialization);
 
         doctorService.addDoctor(doctor);
     }
@@ -388,17 +324,14 @@ public class Main {
 
         System.out.println("\n===== ALL DOCTORS =====");
 
-        if (doctorService
-                .getAllDoctors()
-                .isEmpty()) {
+        if (doctorService.getAllDoctors().isEmpty()) {
 
             System.out.println("No doctors found.");
 
             return;
         }
 
-        for (Doctor doctor :
-                doctorService.getAllDoctors()) {
+        for (Doctor doctor : doctorService.getAllDoctors()) {
 
             System.out.println("\n" + doctor);
         }
@@ -409,30 +342,22 @@ public class Main {
 
         System.out.println("\n===== UPDATE DOCTOR =====");
 
-        String id =
-                readRequiredString("Doctor ID: ");
+        String id = readRequiredString("Doctor ID: ");
 
-        String name =
-                readRequiredString("New name: ");
+        String name = readRequiredString("New name: ");
 
-        String phone =
-                readRequiredString("New phone: ");
+        String phone = readRequiredString("New phone: ");
 
-        String email =
-                readRequiredString("New email: ");
+        String email = readRequiredString("New email: ");
 
-        String specialization =
-                readRequiredString(
-                        "New specialization: "
-                );
+        String specialization = readRequiredString("New specialization: ");
 
         doctorService.updateDoctor(
                 id,
                 name,
                 phone,
                 email,
-                specialization
-        );
+                specialization);
     }
 
     private static void deleteDoctor()
@@ -440,15 +365,12 @@ public class Main {
 
         System.out.println("\n===== DELETE DOCTOR =====");
 
-        String id =
-                readRequiredString("Doctor ID: ");
+        String id = readRequiredString("Doctor ID: ");
 
         doctorService.deleteDoctor(id);
     }
 
-    // =====================================================
     // APPOINTMENT MENU
-    // =====================================================
 
     private static void appointmentMenu() {
 
@@ -495,16 +417,12 @@ public class Main {
                         break;
 
                     default:
-                        System.out.println(
-                                "Invalid choice."
-                        );
+                        System.out.println("Invalid choice.");
                 }
 
             } catch (Exception e) {
 
-                System.out.println(
-                        "Error: " + e.getMessage()
-                );
+                System.out.println("Error: " + e.getMessage());
             }
 
         } while (choice != 0);
@@ -515,49 +433,23 @@ public class Main {
             DoctorNotFoundException,
             AppointmentUnavailableException {
 
-        System.out.println(
-                "\n===== BOOK APPOINTMENT ====="
-        );
+        System.out.println("\n===== BOOK APPOINTMENT =====");
 
-        String appointmentId =
-                readRequiredString(
-                        "Appointment ID: "
-                );
+        String appointmentId = readRequiredString("Appointment ID: ");
 
-        String patientId =
-                readRequiredString(
-                        "Patient ID: "
-                );
+        String patientId = readRequiredString("Patient ID: ");
 
-        String doctorId =
-                readRequiredString(
-                        "Doctor ID: "
-                );
+        String doctorId = readRequiredString("Doctor ID: ");
 
-        String date =
-                readRequiredString(
-                        "Date (YYYY-MM-DD): "
-                );
+        String date = readRequiredString("Date (YYYY-MM-DD): ");
 
-        String time =
-                readRequiredString(
-                        "Time (HH:MM AM/PM): "
-                );
+        String time = readRequiredString("Time (HH:MM AM/PM): ");
 
-        String reason =
-                readRequiredString(
-                        "Reason: "
-                );
+        String reason = readRequiredString("Reason: ");
 
-        Patient patient =
-                patientService.findPatientById(
-                        patientId
-                );
+        Patient patient = patientService.findPatientById(patientId);
 
-        Doctor doctor =
-                doctorService.findDoctorById(
-                        doctorId
-                );
+        Doctor doctor = doctorService.findDoctorById(doctorId);
 
         appointmentService.bookAppointment(
                 appointmentId,
@@ -565,97 +457,70 @@ public class Main {
                 doctor,
                 date,
                 time,
-                reason
-        );
+                reason);
     }
 
     private static void viewAppointments() {
 
-        System.out.println(
-                "\n===== ALL APPOINTMENTS ====="
-        );
+        System.out.println("\n===== ALL APPOINTMENTS =====");
 
         if (appointmentService
                 .getAllAppointments()
                 .isEmpty()) {
 
             System.out.println(
-                    "No appointments found."
-            );
+                    "No appointments found.");
 
             return;
         }
 
-        for (Appointment appointment :
-                appointmentService
-                        .getAllAppointments()) {
+        for (Appointment appointment : appointmentService
+                .getAllAppointments()) {
 
             System.out.println(
-                    appointment
-            );
+                    appointment);
         }
     }
 
     private static void rescheduleAppointment()
             throws AppointmentUnavailableException {
 
-        System.out.println(
-                "\n===== RESCHEDULE ====="
-        );
+        System.out.println("\n===== RESCHEDULE =====");
 
-        String id =
-                readRequiredString(
-                        "Appointment ID: "
-                );
+        String id = readRequiredString(
+                "Appointment ID: ");
 
-        String date =
-                readRequiredString(
-                        "New date: "
-                );
+        String date = readRequiredString(
+                "New date: ");
 
-        String time =
-                readRequiredString(
-                        "New time: "
-                );
+        String time = readRequiredString(
+                "New time: ");
 
         appointmentService.rescheduleAppointment(
                 id,
                 date,
-                time
-        );
+                time);
     }
 
     private static void cancelAppointment() {
 
-        System.out.println(
-                "\n===== CANCEL APPOINTMENT ====="
-        );
+        System.out.println("\n===== CANCEL APPOINTMENT =====");
 
-        String id =
-                readRequiredString(
-                        "Appointment ID: "
-                );
+        String id = readRequiredString("Appointment ID: ");
 
         appointmentService.cancelAppointment(id);
     }
 
     private static void completeAppointment() {
 
-        System.out.println(
-                "\n===== COMPLETE APPOINTMENT ====="
-        );
+        System.out.println("\n===== COMPLETE APPOINTMENT =====");
 
-        String id =
-                readRequiredString(
-                        "Appointment ID: "
-                );
+        String id = readRequiredString("Appointment ID: ");
 
         appointmentService.completeAppointment(id);
     }
 
-    // =====================================================
     // SEARCH
-    // =====================================================
 
     private static void searchMenu() {
 
@@ -666,8 +531,7 @@ public class Main {
         System.out.println("3. Search Appointment");
         System.out.println("0. Back");
 
-        int choice =
-                readInt("Enter choice: ");
+        int choice = readInt("Enter choice: ");
 
         try {
 
@@ -675,20 +539,11 @@ public class Main {
 
                 case 1:
 
-                    String patientId =
-                            readRequiredString(
-                                    "Patient ID: "
-                            );
+                    String patientId = readRequiredString("Patient ID: ");
 
-                    Patient patient =
-                            patientService
-                                    .findPatientById(
-                                            patientId
-                                    );
+                    Patient patient = patientService.findPatientById(patientId);
 
-                    System.out.println(
-                            "\n" + patient
-                    );
+                    System.out.println("\n" + patient);
 
                     break;
 
@@ -704,25 +559,17 @@ public class Main {
 
                 case 3:
 
-                    String appointmentId =readRequiredString("Appointment ID: ");
+                    String appointmentId = readRequiredString("Appointment ID: ");
 
-                    Appointment appointment =
-                            appointmentService
-                                    .findAppointmentById(
-                                            appointmentId
-                                    );
+                    Appointment appointment = appointmentService.findAppointmentById(appointmentId);
 
                     if (appointment == null) {
 
-                        System.out.println(
-                                "Appointment not found."
-                        );
+                        System.out.println("Appointment not found.");
 
                     } else {
 
-                        System.out.println(
-                                appointment
-                        );
+                        System.out.println(appointment);
                     }
 
                     break;
@@ -732,22 +579,16 @@ public class Main {
 
                 default:
 
-                    System.out.println(
-                            "Invalid choice."
-                    );
+                    System.out.println("Invalid choice.");
             }
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "Error: " + e.getMessage()
-            );
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
-    // =====================================================
     // SAVE DATA
-    // =====================================================
 
     private static void saveData() {
 
@@ -758,67 +599,47 @@ public class Main {
         FileManager.saveAppointments(appointmentService.getAllAppointments());
     }
 
-    // =====================================================
     // LOAD DATA
-    // =====================================================
 
     private static void loadData() {
 
-        FileManager.loadPatients(
-                patientService.getAllPatients()
-        );
+        FileManager.loadPatients(patientService.getAllPatients());
 
-        FileManager.loadDoctors(
-                doctorService.getAllDoctors()
-        );
+        FileManager.loadDoctors(doctorService.getAllDoctors());
 
-        FileManager.loadAppointments(
-                appointmentService.getAllAppointments(),
-                patientService.getAllPatients(),
-                doctorService.getAllDoctors()
-        );
+        FileManager.loadAppointments(appointmentService.getAllAppointments(),patientService.getAllPatients(),doctorService.getAllDoctors());
     }
 
-    // =====================================================
     // POLYMORPHISM DEMO
-    // =====================================================
 
     private static void notificationDemo() {
 
-        System.out.println(
-                "\n===== POLYMORPHISM DEMO ====="
-        );
+        System.out.println("\n===== POLYMORPHISM DEMO =====");
 
         Notification notification;
 
         // Parent/interface reference
         // pointing to EmailNotification object
 
-        notification =
-                new EmailNotification();
+        notification = new EmailNotification();
 
         notification.send(
                 "patient@gmail.com",
                 "Your clinic appointment "
-                        + "has been confirmed."
-        );
+                        + "has been confirmed.");
 
         // Same reference
         // pointing to SMSNotification object
 
-        notification =
-                new SMSNotification();
+        notification = new SMSNotification();
 
         notification.send(
                 "09123456789",
                 "Your clinic appointment "
-                        + "has been confirmed."
-        );
+                        + "has been confirmed.");
     }
 
-    // =====================================================
     // INPUT VALIDATION
-    // =====================================================
 
     private static String readRequiredString(
             String message) {
@@ -827,16 +648,13 @@ public class Main {
 
             System.out.print(message);
 
-            String input =
-                    scanner.nextLine().trim();
+            String input = scanner.nextLine().trim();
 
             if (!input.isEmpty()) {
                 return input;
             }
 
-            System.out.println(
-                    "Input cannot be empty."
-            );
+            System.out.println("Input cannot be empty.");
         }
     }
 
@@ -848,17 +666,12 @@ public class Main {
 
                 System.out.print(message);
 
-                return Integer.parseInt(
-                        scanner.nextLine().trim()
-                );
+                return Integer.parseInt(scanner.nextLine().trim());
 
             } catch (NumberFormatException e) {
 
-                System.out.println(
-                        "Please enter a valid number."
-                );
+                System.out.println("Please enter a valid number.");
             }
         }
     }
 }
-
