@@ -240,7 +240,7 @@ public class Main {
 
         String id = readRequiredString("Patient ID: ");
 
-        patientService.deletePatient(id);
+        patientService.deletePatient(id, appointmentService.getAllAppointments());
     }
 
     // DOCTOR MENU
@@ -367,7 +367,7 @@ public class Main {
 
         String id = readRequiredString("Doctor ID: ");
 
-        doctorService.deleteDoctor(id);
+        doctorService.deleteDoctor(id, appointmentService.getAllAppointments());
     }
 
     // APPOINTMENT MENU

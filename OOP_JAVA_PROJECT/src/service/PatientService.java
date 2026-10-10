@@ -1,5 +1,7 @@
+
 package service;
 
+import model.Appointment;
 import model.Patient;
 import exception.PatientNotFoundException;
 
@@ -8,7 +10,7 @@ import java.util.List;
 
 public class PatientService {
 
-    private List<Patient> patients;
+    private final List<Patient> patients;
 
     public PatientService() {
         patients = new ArrayList<>();
@@ -16,24 +18,18 @@ public class PatientService {
 
     // CREATE
     public void addPatient(Patient patient) {
-
         if (patient == null) {
             throw new IllegalArgumentException(
-                    "Patient cannot be null."
-            );
+                    "Patient cannot be null.");
         }
 
         if (findPatientWithoutException(patient.getId()) != null) {
             throw new IllegalArgumentException(
-                    "Patient ID already exists."
-            );
+                    "Patient ID already exists.");
         }
 
         patients.add(patient);
-
-        System.out.println(
-                "Patient added successfully."
-        );
+        System.out.println("Patient added successfully.");
     }
 
     // READ
@@ -48,18 +44,19 @@ public class PatientService {
 
         if (patient == null) {
             throw new PatientNotFoundException(
-                    "Patient with ID " + id + " not found."
-            );
+                    "Patient with ID " + id + " not found.");
         }
 
         return patient;
     }
 
     private Patient findPatientWithoutException(String id) {
+        if (id == null) {
+            return null;
+        }
 
         for (Patient patient : patients) {
-
-            if (patient.getId().equalsIgnoreCase(id)) {
+            if (patient.getId().equalsIgnoreCase(id.trim())) {
                 return patient;
             }
         }
@@ -78,6 +75,11 @@ public class PatientService {
             String address)
             throws PatientNotFoundException {
 
+        if (age <= 0) {
+            throw new IllegalArgumentException(
+                    "Age must be greater than zero.");
+        }
+
         Patient patient = findPatientById(id);
 
         patient.setName(name);
@@ -87,21 +89,31 @@ public class PatientService {
         patient.setGender(gender);
         patient.setAddress(address);
 
-        System.out.println(
-                "Patient updated successfully."
-        );
+        System.out.println("Patient updated successfully.");
     }
 
     // DELETE
-    public void deletePatient(String id)
+    public void deletePatient(
+            String id,
+            List<Appointment> appointments)
             throws PatientNotFoundException {
 
         Patient patient = findPatientById(id);
 
-        patients.remove(patient);
+        if (appointments != null) {
+            for (Appointment appointment : appointments) {
+                if (appointment.getPatient().getId()
+                        .equalsIgnoreCase(patient.getId())) {
 
-        System.out.println(
-                "Patient deleted successfully."
-        );
+                    throw new IllegalStateException(
+                            "Cannot delete patient because appointment "
+                                    + appointment.getAppointmentId()
+                                    + " references this patient.");
+                }
+            }
+        }
+
+        patients.remove(patient);
+        System.out.println("Patient deleted successfully.");
     }
 }

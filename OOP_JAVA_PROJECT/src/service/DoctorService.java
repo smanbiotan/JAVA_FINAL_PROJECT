@@ -1,5 +1,6 @@
 package service;
 
+import model.Appointment;
 import model.Doctor;
 import exception.DoctorNotFoundException;
 
@@ -8,7 +9,7 @@ import java.util.List;
 
 public class DoctorService {
 
-    private List<Doctor> doctors;
+    private final List<Doctor> doctors;
 
     public DoctorService() {
         doctors = new ArrayList<>();
@@ -16,24 +17,18 @@ public class DoctorService {
 
     // CREATE
     public void addDoctor(Doctor doctor) {
-
         if (doctor == null) {
             throw new IllegalArgumentException(
-                    "Doctor cannot be null."
-            );
+                    "Doctor cannot be null.");
         }
 
         if (findDoctorWithoutException(doctor.getId()) != null) {
             throw new IllegalArgumentException(
-                    "Doctor ID already exists."
-            );
+                    "Doctor ID already exists.");
         }
 
         doctors.add(doctor);
-
-        System.out.println(
-                "Doctor added successfully."
-        );
+        System.out.println("Doctor added successfully.");
     }
 
     // READ
@@ -48,18 +43,19 @@ public class DoctorService {
 
         if (doctor == null) {
             throw new DoctorNotFoundException(
-                    "Doctor with ID " + id + " not found."
-            );
+                    "Doctor with ID " + id + " not found.");
         }
 
         return doctor;
     }
 
     private Doctor findDoctorWithoutException(String id) {
+        if (id == null) {
+            return null;
+        }
 
         for (Doctor doctor : doctors) {
-
-            if (doctor.getId().equalsIgnoreCase(id)) {
+            if (doctor.getId().equalsIgnoreCase(id.trim())) {
                 return doctor;
             }
         }
@@ -83,21 +79,31 @@ public class DoctorService {
         doctor.setEmail(email);
         doctor.setSpecialization(specialization);
 
-        System.out.println(
-                "Doctor updated successfully."
-        );
+        System.out.println("Doctor updated successfully.");
     }
 
     // DELETE
-    public void deleteDoctor(String id)
+    public void deleteDoctor(
+            String id,
+            List<Appointment> appointments)
             throws DoctorNotFoundException {
 
         Doctor doctor = findDoctorById(id);
 
-        doctors.remove(doctor);
+        if (appointments != null) {
+            for (Appointment appointment : appointments) {
+                if (appointment.getDoctor().getId()
+                        .equalsIgnoreCase(doctor.getId())) {
 
-        System.out.println(
-                "Doctor deleted successfully."
-        );
+                    throw new IllegalStateException(
+                            "Cannot delete doctor because appointment "
+                                    + appointment.getAppointmentId()
+                                    + " references this doctor.");
+                }
+            }
+        }
+
+        doctors.remove(doctor);
+        System.out.println("Doctor deleted successfully.");
     }
 }
