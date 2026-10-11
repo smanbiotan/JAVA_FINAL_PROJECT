@@ -28,46 +28,57 @@ public class Appointment {
     }
 
     public String getAppointmentId() {
+    	
         return appointmentId;
     }
 
     public Patient getPatient() {
+    	
         return patient;
     }
 
     public Doctor getDoctor() {
+    	
         return doctor;
     }
 
     public String getDate() {
+    	
         return date;
     }
 
     public String getTime() {
+    	
         return time;
     }
 
     public String getReason() {
+    	
         return reason;
     }
 
     public String getStatus() {
+    	
         return status;
     }
 
     public void setDate(String date) {
+    	
         this.date = date;
     }
 
     public void setTime(String time) {
+    	
         this.time = time;
     }
 
     public void setReason(String reason) {
+    	
         this.reason = reason;
     }
 
     public void setStatus(String status) {
+    	
         this.status = status;
     }
 

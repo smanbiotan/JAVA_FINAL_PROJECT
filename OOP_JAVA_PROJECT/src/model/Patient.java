@@ -23,39 +23,43 @@ public class Patient extends Person {
     }
 
     public int getAge() {
+    	
         return age;
     }
 
     public String getGender() {
+    	
         return gender;
     }
 
     public String getAddress() {
+    	
         return address;
     }
 
     public void setAge(int age) {
+    	
         this.age = age;
     }
 
     public void setGender(String gender) {
+    	
         this.gender = gender;
     }
 
     public void setAddress(String address) {
+    	
         this.address = address;
     }
 
     @Override
     public String getRole() {
+    	
         return "Patient";
     }
 
     @Override
     public String toString() {
-        return super.toString() +
-                "\nAge: " + age +
-                "\nGender: " + gender +
-                "\nAddress: " + address;
+        return super.toString() + "\nAge: " + age + "\nGender: " + gender + "\nAddress: " + address;
     }
 }

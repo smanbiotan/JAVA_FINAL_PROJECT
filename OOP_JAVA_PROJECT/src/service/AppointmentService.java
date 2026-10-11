@@ -20,9 +20,7 @@ public class AppointmentService {
 
     private final List<Appointment> appointments;
 
-    private static final DateTimeFormatter DATE_FORMAT =
-            DateTimeFormatter.ofPattern("uuuu-MM-dd")
-                    .withResolverStyle(ResolverStyle.STRICT);
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("uuuu-MM-dd").withResolverStyle(ResolverStyle.STRICT);
 
     private static final DateTimeFormatter TIME_12_HOUR =
             new DateTimeFormatterBuilder()
@@ -30,11 +28,9 @@ public class AppointmentService {
                     .appendPattern("h:mm a")
                     .toFormatter(Locale.US);
 
-    private static final DateTimeFormatter TIME_24_HOUR =
-            DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter TIME_24_HOUR = DateTimeFormatter.ofPattern("HH:mm");
 
-    private static final DateTimeFormatter DISPLAY_TIME =
-            DateTimeFormatter.ofPattern("hh:mm a", Locale.US);
+    private static final DateTimeFormatter DISPLAY_TIME = DateTimeFormatter.ofPattern("hh:mm a", Locale.US);
 
     public AppointmentService() {
         appointments = new ArrayList<>();
@@ -51,30 +47,25 @@ public class AppointmentService {
             throws AppointmentUnavailableException {
 
         if (isBlank(appointmentId)) {
-            throw new IllegalArgumentException(
-                    "Appointment ID is required.");
+            throw new IllegalArgumentException("Appointment ID is required.");
         }
 
         if (patient == null || doctor == null) {
-            throw new IllegalArgumentException(
-                    "Patient and doctor are required.");
+            throw new IllegalArgumentException("Patient and doctor are required.");
         }
 
         if (isBlank(reason)) {
-            throw new IllegalArgumentException(
-                    "Appointment reason is required.");
+            throw new IllegalArgumentException("Appointment reason is required.");
         }
 
         if (findAppointmentById(appointmentId) != null) {
-            throw new IllegalArgumentException(
-                    "Appointment ID already exists.");
+            throw new IllegalArgumentException("Appointment ID already exists.");
         }
 
         String validDate = normalizeDate(date);
         String validTime = normalizeTime(time);
 
-        checkDoctorConflict(
-                doctor.getId(), validDate, validTime, null);
+        checkDoctorConflict(doctor.getId(), validDate, validTime, null);
 
         Appointment appointment = new Appointment(
                 appointmentId.trim(),
@@ -91,17 +82,20 @@ public class AppointmentService {
 
     // READ
     public List<Appointment> getAllAppointments() {
+    	
         return appointments;
     }
 
     public Appointment findAppointmentById(String id) {
+    	
         if (isBlank(id)) {
             return null;
         }
 
         for (Appointment appointment : appointments) {
-            if (appointment.getAppointmentId()
-                    .equalsIgnoreCase(id.trim())) {
+        	
+            if (appointment.getAppointmentId().equalsIgnoreCase(id.trim())) {
+            	
                 return appointment;
             }
         }
@@ -119,20 +113,18 @@ public class AppointmentService {
         Appointment appointment = findAppointmentById(id);
 
         if (appointment == null) {
-            throw new AppointmentUnavailableException(
-                    "Appointment not found: " + id);
+        	
+            throw new AppointmentUnavailableException("Appointment not found: " + id);
         }
 
         String status = appointment.getStatus();
 
         if ("CANCELLED".equalsIgnoreCase(status)) {
-            throw new AppointmentUnavailableException(
-                    "Cancelled appointment cannot be rescheduled.");
+            throw new AppointmentUnavailableException("Cancelled appointment cannot be rescheduled.");
         }
 
         if ("COMPLETED".equalsIgnoreCase(status)) {
-            throw new AppointmentUnavailableException(
-                    "Completed appointment cannot be rescheduled.");
+            throw new AppointmentUnavailableException("Completed appointment cannot be rescheduled.");
         }
 
         String validDate;
@@ -142,8 +134,7 @@ public class AppointmentService {
             validDate = normalizeDate(newDate);
             validTime = normalizeTime(newTime);
         } catch (IllegalArgumentException e) {
-            throw new AppointmentUnavailableException(
-                    e.getMessage());
+            throw new AppointmentUnavailableException(e.getMessage());
         }
 
         checkDoctorConflict(
@@ -159,37 +150,34 @@ public class AppointmentService {
         // IMPORTANT: preserve this status for n8n
         appointment.setStatus("RESCHEDULED");
 
-        System.out.println(
-                "Appointment rescheduled successfully.");
+        System.out.println("Appointment rescheduled successfully.");
     }
 
     // CANCEL
     public void cancelAppointment(String id) {
+    	
         Appointment appointment = findAppointmentById(id);
 
         if (appointment == null) {
+        	
             System.out.println("Appointment not found.");
             return;
         }
 
         if ("COMPLETED".equalsIgnoreCase(
                 appointment.getStatus())) {
-            System.out.println(
-                    "Completed appointments cannot be cancelled.");
+            System.out.println("Completed appointments cannot be cancelled.");
             return;
         }
 
-        if ("CANCELLED".equalsIgnoreCase(
-                appointment.getStatus())) {
-            System.out.println(
-                    "Appointment is already cancelled.");
+        if ("CANCELLED".equalsIgnoreCase(appointment.getStatus())) {
+            System.out.println("Appointment is already cancelled.");
             return;
         }
 
         appointment.setStatus("CANCELLED");
 
-        System.out.println(
-                "Appointment cancelled successfully.");
+        System.out.println("Appointment cancelled successfully.");
     }
 
     // COMPLETE
@@ -203,22 +191,19 @@ public class AppointmentService {
 
         if ("CANCELLED".equalsIgnoreCase(
                 appointment.getStatus())) {
-            System.out.println(
-                    "Cancelled appointments cannot be completed.");
+            System.out.println("Cancelled appointments cannot be completed.");
             return;
         }
 
         if ("COMPLETED".equalsIgnoreCase(
                 appointment.getStatus())) {
-            System.out.println(
-                    "Appointment is already completed.");
+            System.out.println("Appointment is already completed.");
             return;
         }
 
         appointment.setStatus("COMPLETED");
 
-        System.out.println(
-                "Appointment completed successfully.");
+        System.out.println("Appointment completed successfully.");
     }
 
     // CHECK DOCTOR AVAILABILITY
@@ -240,28 +225,20 @@ public class AppointmentService {
 
             String status = existing.getStatus();
 
-            boolean active =
-                    "CONFIRMED".equalsIgnoreCase(status)
-                    || "RESCHEDULED".equalsIgnoreCase(status);
+            boolean active ="CONFIRMED".equalsIgnoreCase(status) || "RESCHEDULED".equalsIgnoreCase(status);
 
             if (!active) {
                 continue;
             }
 
-            boolean sameDoctor =
-                    existing.getDoctor().getId()
-                            .equalsIgnoreCase(doctorId);
+            boolean sameDoctor = existing.getDoctor().getId().equalsIgnoreCase(doctorId);
 
-            boolean sameDate =
-                    existing.getDate().equals(date);
+            boolean sameDate = existing.getDate().equals(date);
 
-            boolean sameTime =
-                    existing.getTime().equals(time);
+            boolean sameTime = existing.getTime().equals(time);
 
             if (sameDoctor && sameDate && sameTime) {
-                throw new AppointmentUnavailableException(
-                        "Doctor is already booked on "
-                                + date + " at " + time + ".");
+                throw new AppointmentUnavailableException( "Doctor is already booked on " + date + " at " + time + ".");
             }
         }
     }
@@ -269,17 +246,13 @@ public class AppointmentService {
     // VALIDATE DATE
     private String normalizeDate(String date) {
         if (isBlank(date)) {
-            throw new IllegalArgumentException(
-                    "Date is required.");
+            throw new IllegalArgumentException("Date is required.");
         }
 
         try {
-            return LocalDate.parse(
-                    date.trim(), DATE_FORMAT).toString();
+            return LocalDate.parse(date.trim(), DATE_FORMAT).toString();
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException(
-                    "Invalid date. Use YYYY-MM-DD, "
-                            + "for example 2026-10-28.");
+            throw new IllegalArgumentException("Invalid date. Use YYYY-MM-DD, " + "for example 2026-10-28.");
         }
     }
 
@@ -287,8 +260,7 @@ public class AppointmentService {
     // Accepts 11:30 AM or 11:30 in 24-hour format
     private String normalizeTime(String time) {
         if (isBlank(time)) {
-            throw new IllegalArgumentException(
-                    "Time is required.");
+            throw new IllegalArgumentException("Time is required.");
         }
 
         LocalTime parsedTime;
@@ -301,9 +273,7 @@ public class AppointmentService {
                 parsedTime = LocalTime.parse(
                         time.trim(), TIME_24_HOUR);
             } catch (DateTimeParseException ex) {
-                throw new IllegalArgumentException(
-                        "Invalid time. Use HH:MM AM/PM "
-                                + "or 24-hour HH:MM.");
+                throw new IllegalArgumentException("Invalid time. Use HH:MM AM/PM " + "or 24-hour HH:MM.");
             }
         }
 

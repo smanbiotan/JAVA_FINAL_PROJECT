@@ -24,29 +24,34 @@ public class Doctor extends Person {
     }
 
     public String getSpecialization() {
+    	
         return specialization;
     }
 
     public void setSpecialization(String specialization) {
+    	
         this.specialization = specialization;
     }
 
     public List<Schedule> getSchedules() {
+    	
         return schedules;
     }
 
     public void addSchedule(Schedule schedule) {
+    	
         schedules.add(schedule);
     }
 
     @Override
     public String getRole() {
+    	
         return "Doctor";
     }
 
     @Override
     public String toString() {
-        return super.toString() +
-                "\nSpecialization: " + specialization;
+    	
+        return super.toString() + "\nSpecialization: " + specialization;
     }
 }

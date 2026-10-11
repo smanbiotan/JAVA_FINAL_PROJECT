@@ -59,8 +59,7 @@ public class Main {
 
                     saveData();
 
-                    System.out.println(
-                            "\nThank you for using " + "Clinic Appointment " + "Management System.");
+                    System.out.println("\nThank you for using " + "Clinic Appointment " + "System.");
                     break;
 
                 default:
@@ -98,8 +97,7 @@ public class Main {
 
         do {
 
-            System.out.println(
-                    "\n========== PATIENT MANAGEMENT ==========");
+            System.out.println("\n========== PATIENT MANAGEMENT ==========");
 
             System.out.println("1. Add Patient");
             System.out.println("2. View All Patients");
@@ -133,8 +131,7 @@ public class Main {
                         break;
 
                     default:
-                        System.out.println(
-                                "Invalid choice.");
+                        System.out.println("Invalid choice.");
                 }
 
             } catch (Exception e) {
@@ -464,21 +461,16 @@ public class Main {
 
         System.out.println("\n===== ALL APPOINTMENTS =====");
 
-        if (appointmentService
-                .getAllAppointments()
-                .isEmpty()) {
+        if (appointmentService.getAllAppointments().isEmpty()) {
 
-            System.out.println(
-                    "No appointments found.");
+            System.out.println("No appointments found.");
 
             return;
         }
 
-        for (Appointment appointment : appointmentService
-                .getAllAppointments()) {
+        for (Appointment appointment : appointmentService.getAllAppointments()) {
 
-            System.out.println(
-                    appointment);
+            System.out.println(appointment);
         }
     }
 
@@ -487,14 +479,11 @@ public class Main {
 
         System.out.println("\n===== RESCHEDULE =====");
 
-        String id = readRequiredString(
-                "Appointment ID: ");
+        String id = readRequiredString("Appointment ID: ");
 
-        String date = readRequiredString(
-                "New date: ");
+        String date = readRequiredString("New date: ");
 
-        String time = readRequiredString(
-                "New time: ");
+        String time = readRequiredString("New time: ");
 
         appointmentService.rescheduleAppointment(
                 id,
@@ -607,7 +596,8 @@ public class Main {
 
         FileManager.loadDoctors(doctorService.getAllDoctors());
 
-        FileManager.loadAppointments(appointmentService.getAllAppointments(),patientService.getAllPatients(),doctorService.getAllDoctors());
+        FileManager.loadAppointments(appointmentService.getAllAppointments(),
+        		patientService.getAllPatients(),doctorService.getAllDoctors());
     }
 
     // POLYMORPHISM DEMO
@@ -623,26 +613,19 @@ public class Main {
 
         notification = new EmailNotification();
 
-        notification.send(
-                "patient@gmail.com",
-                "Your clinic appointment "
-                        + "has been confirmed.");
+        notification.send("patient@gmail.com", "Your clinic appointment " + "has been confirmed.");
 
         // Same reference
         // pointing to SMSNotification object
 
         notification = new SMSNotification();
 
-        notification.send(
-                "09123456789",
-                "Your clinic appointment "
-                        + "has been confirmed.");
+        notification.send("09123456789", "Your clinic appointment " + "has been confirmed.");
     }
 
     // INPUT VALIDATION
 
-    private static String readRequiredString(
-            String message) {
+    private static String readRequiredString(String message) {
 
         while (true) {
 

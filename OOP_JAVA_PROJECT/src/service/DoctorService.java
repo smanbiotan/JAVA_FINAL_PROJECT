@@ -18,13 +18,11 @@ public class DoctorService {
     // CREATE
     public void addDoctor(Doctor doctor) {
         if (doctor == null) {
-            throw new IllegalArgumentException(
-                    "Doctor cannot be null.");
+            throw new IllegalArgumentException("Doctor cannot be null.");
         }
 
         if (findDoctorWithoutException(doctor.getId()) != null) {
-            throw new IllegalArgumentException(
-                    "Doctor ID already exists.");
+            throw new IllegalArgumentException("Doctor ID already exists.");
         }
 
         doctors.add(doctor);
@@ -42,8 +40,7 @@ public class DoctorService {
         Doctor doctor = findDoctorWithoutException(id);
 
         if (doctor == null) {
-            throw new DoctorNotFoundException(
-                    "Doctor with ID " + id + " not found.");
+            throw new DoctorNotFoundException("Doctor with ID " + id + " not found.");
         }
 
         return doctor;
@@ -95,8 +92,7 @@ public class DoctorService {
                 if (appointment.getDoctor().getId()
                         .equalsIgnoreCase(doctor.getId())) {
 
-                    throw new IllegalStateException(
-                            "Cannot delete doctor because appointment "
+                    throw new IllegalStateException("Cannot delete doctor because appointment "
                                     + appointment.getAppointmentId()
                                     + " references this doctor.");
                 }

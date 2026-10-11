@@ -19,13 +19,11 @@ public class PatientService {
     // CREATE
     public void addPatient(Patient patient) {
         if (patient == null) {
-            throw new IllegalArgumentException(
-                    "Patient cannot be null.");
+            throw new IllegalArgumentException("Patient cannot be null.");
         }
 
         if (findPatientWithoutException(patient.getId()) != null) {
-            throw new IllegalArgumentException(
-                    "Patient ID already exists.");
+            throw new IllegalArgumentException("Patient ID already exists.");
         }
 
         patients.add(patient);
@@ -43,8 +41,7 @@ public class PatientService {
         Patient patient = findPatientWithoutException(id);
 
         if (patient == null) {
-            throw new PatientNotFoundException(
-                    "Patient with ID " + id + " not found.");
+            throw new PatientNotFoundException("Patient with ID " + id + " not found.");
         }
 
         return patient;
@@ -76,8 +73,7 @@ public class PatientService {
             throws PatientNotFoundException {
 
         if (age <= 0) {
-            throw new IllegalArgumentException(
-                    "Age must be greater than zero.");
+            throw new IllegalArgumentException("Age must be greater than zero.");
         }
 
         Patient patient = findPatientById(id);
@@ -105,8 +101,7 @@ public class PatientService {
                 if (appointment.getPatient().getId()
                         .equalsIgnoreCase(patient.getId())) {
 
-                    throw new IllegalStateException(
-                            "Cannot delete patient because appointment "
+                    throw new IllegalStateException("Cannot delete patient because appointment "
                                     + appointment.getAppointmentId()
                                     + " references this patient.");
                 }
