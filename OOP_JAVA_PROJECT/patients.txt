@@ -1,3 +1,5 @@
-251-321|Rene Baterbonia|0915151562|test@gmail.com|18|male|butuan city
-251-001|Koskie|90184014|exam@gmail.com|19|male|pequeno
+PNT-321|Rene Baterbonia|0915151562|test@gmail.com|18|male|butuan city
+PNT-001|Koskie|90184014|exam@gmail.com|19|male|pequeno
 PNT-001|Kato|09151895051|testt@gmail.com|19|Male|Pequeno
+PNT-004|jandoe|09932131244|jandoe@gmail.com|21|Male|Villa
+PNT-005|jandek|0914151516|jandek@gmail.com|20|Female|Ampayon

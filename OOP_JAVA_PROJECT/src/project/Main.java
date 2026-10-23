@@ -620,7 +620,7 @@ public class Main {
 
         notification = new SMSNotification();
 
-        notification.send("09123456789", "Your clinic appointment " + "has been confirmed.");
+        notification.send("09932815819/09562440212", "Your clinic appointment " + "has been confirmed.");
     }
 
     // INPUT VALIDATION

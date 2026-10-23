@@ -9,25 +9,19 @@ import java.util.List;
 
 public class FileManager {
 
-    private static final String PATIENT_FILE =
-            "patients.txt";
+    private static final String PATIENT_FILE = "patients.txt";
 
-    private static final String DOCTOR_FILE =
-            "doctors.txt";
+    private static final String DOCTOR_FILE = "doctors.txt";
 
-    private static final String APPOINTMENT_FILE =
-            "appointments.txt";
+    private static final String APPOINTMENT_FILE = "appointments.txt";
 
     // ==========================
     // SAVE PATIENTS
     // ==========================
 
-    public static void savePatients(
-            List<Patient> patients) {
+    public static void savePatients(List<Patient> patients) {
 
-        try (BufferedWriter writer =
-                     new BufferedWriter(
-                             new FileWriter(PATIENT_FILE))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PATIENT_FILE))) {
 
             for (Patient patient : patients) {
 
@@ -44,16 +38,11 @@ public class FileManager {
                 writer.newLine();
             }
 
-            System.out.println(
-                    "Patients saved successfully."
-            );
+            System.out.println("Patients saved successfully.");
 
         } catch (IOException e) {
 
-            System.out.println(
-                    "Error saving patients: "
-                            + e.getMessage()
-            );
+            System.out.println("Error saving patients: "+ e.getMessage());
         }
     }
 
@@ -61,12 +50,9 @@ public class FileManager {
     // SAVE DOCTORS
     // ==========================
 
-    public static void saveDoctors(
-            List<Doctor> doctors) {
+    public static void saveDoctors( List<Doctor> doctors) {
 
-        try (BufferedWriter writer =
-                     new BufferedWriter(
-                             new FileWriter(DOCTOR_FILE))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DOCTOR_FILE))) {
 
             for (Doctor doctor : doctors) {
 
@@ -81,15 +67,11 @@ public class FileManager {
                 writer.newLine();
             }
 
-            System.out.println(
-                    "Doctors saved successfully."
-            );
+            System.out.println("Doctors saved successfully.");
 
         } catch (IOException e) {
 
-            System.out.println(
-                    "Error saving doctors: "
-                            + e.getMessage()
+            System.out.println("Error saving doctors: " + e.getMessage()
             );
         }
     }
@@ -98,15 +80,11 @@ public class FileManager {
     // SAVE APPOINTMENTS
     // ==========================
 
-    public static void saveAppointments(
-            List<Appointment> appointments) {
+    public static void saveAppointments(List<Appointment> appointments) {
 
-        try (BufferedWriter writer =
-                     new BufferedWriter(
-                             new FileWriter(APPOINTMENT_FILE))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(APPOINTMENT_FILE))) {
 
-            for (Appointment appointment :
-                    appointments) {
+            for (Appointment appointment : appointments) {
 
                 writer.write(
                         appointment.getAppointmentId()
@@ -127,16 +105,11 @@ public class FileManager {
                 writer.newLine();
             }
 
-            System.out.println(
-                    "Appointments saved successfully."
-            );
+            System.out.println("Appointments saved successfully.");
 
         } catch (IOException e) {
 
-            System.out.println(
-                    "Error saving appointments: "
-                            + e.getMessage()
-            );
+            System.out.println("Error saving appointments: " + e.getMessage());
         }
     }
 
@@ -144,8 +117,7 @@ public class FileManager {
     // LOAD PATIENTS
     // ==========================
 
-    public static void loadPatients(
-            List<Patient> patients) {
+    public static void loadPatients(List<Patient> patients) {
 
         File file = new File(PATIENT_FILE);
 
@@ -153,9 +125,7 @@ public class FileManager {
             return;
         }
 
-        try (BufferedReader reader =
-                     new BufferedReader(
-                             new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 
             String line;
 
@@ -180,17 +150,12 @@ public class FileManager {
                 patients.add(patient);
             }
 
-            System.out.println(
-                    "Patients loaded successfully."
+            System.out.println("Patients loaded successfully."
             );
 
-        } catch (IOException |
-                 NumberFormatException e) {
+        } catch (IOException | NumberFormatException e) {
 
-            System.out.println(
-                    "Error loading patients: "
-                            + e.getMessage()
-            );
+            System.out.println("Error loading patients: " + e.getMessage());
         }
     }
 
@@ -198,8 +163,7 @@ public class FileManager {
     // LOAD DOCTORS
     // ==========================
 
-    public static void loadDoctors(
-            List<Doctor> doctors) {
+    public static void loadDoctors(List<Doctor> doctors) {
 
         File file = new File(DOCTOR_FILE);
 
@@ -207,9 +171,7 @@ public class FileManager {
             return;
         }
 
-        try (BufferedReader reader =
-                     new BufferedReader(
-                             new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 
             String line;
 
@@ -232,16 +194,11 @@ public class FileManager {
                 doctors.add(doctor);
             }
 
-            System.out.println(
-                    "Doctors loaded successfully."
-            );
+            System.out.println("Doctors loaded successfully.");
 
         } catch (IOException e) {
 
-            System.out.println(
-                    "Error loading doctors: "
-                            + e.getMessage()
-            );
+            System.out.println("Error loading doctors: " + e.getMessage());
         }
     }
 
@@ -249,10 +206,7 @@ public class FileManager {
     // LOAD APPOINTMENTS
     // ==========================
 
-    public static void loadAppointments(
-            List<Appointment> appointments,
-            List<Patient> patients,
-            List<Doctor> doctors) {
+    public static void loadAppointments(List<Appointment> appointments, List<Patient> patients, List<Doctor> doctors) {
 
         File file = new File(APPOINTMENT_FILE);
 
@@ -260,9 +214,7 @@ public class FileManager {
             return;
         }
 
-        try (BufferedReader reader =
-                     new BufferedReader(
-                             new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader( new FileReader(file))) {
 
             String line;
 
@@ -274,20 +226,11 @@ public class FileManager {
                     continue;
                 }
 
-                Patient patient =
-                        findPatient(
-                                patients,
-                                data[1]
-                        );
+                Patient patient = findPatient(patients, data[1]);
 
-                Doctor doctor =
-                        findDoctor(
-                                doctors,
-                                data[2]
-                        );
+                Doctor doctor = findDoctor(doctors, data[2]);
 
-                if (patient == null ||
-                        doctor == null) {
+                if (patient == null || doctor == null) {
 
                     continue;
                 }
@@ -307,27 +250,20 @@ public class FileManager {
                 appointments.add(appointment);
             }
 
-            System.out.println(
-                    "Appointments loaded successfully."
-            );
+            System.out.println("Appointments loaded successfully.");
 
         } catch (IOException e) {
 
-            System.out.println(
-                    "Error loading appointments: "
-                            + e.getMessage()
+            System.out.println("Error loading appointments: " + e.getMessage()
             );
         }
     }
 
-    private static Patient findPatient(
-            List<Patient> patients,
-            String id) {
+    private static Patient findPatient(List<Patient> patients, String id) {
 
         for (Patient patient : patients) {
 
-            if (patient.getId()
-                    .equalsIgnoreCase(id)) {
+            if (patient.getId().equalsIgnoreCase(id)) {
 
                 return patient;
             }
@@ -336,14 +272,11 @@ public class FileManager {
         return null;
     }
 
-    private static Doctor findDoctor(
-            List<Doctor> doctors,
-            String id) {
+    private static Doctor findDoctor(List<Doctor> doctors, String id) {
 
         for (Doctor doctor : doctors) {
 
-            if (doctor.getId()
-                    .equalsIgnoreCase(id)) {
+            if (doctor.getId().equalsIgnoreCase(id)) {
 
                 return doctor;
             }

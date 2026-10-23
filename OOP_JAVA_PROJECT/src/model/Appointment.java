@@ -93,7 +93,7 @@ public class Appointment {
                 doctor.getSpecialization() +
                 "\nDate: " + date +
                 "\nTime: " + time +
-                "\nReason: " + reason +
+                "\nPurpose: " + reason +
                 "\nStatus: " + status +
                 "\n================================";
     }

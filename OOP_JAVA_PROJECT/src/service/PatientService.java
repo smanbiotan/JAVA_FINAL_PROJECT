@@ -18,6 +18,7 @@ public class PatientService {
 
     // CREATE
     public void addPatient(Patient patient) {
+ 
         if (patient == null) {
             throw new IllegalArgumentException("Patient cannot be null.");
         }

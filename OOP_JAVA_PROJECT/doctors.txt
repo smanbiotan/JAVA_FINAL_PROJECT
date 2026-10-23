@@ -1,1 +1,9 @@
-251-123|Adili daNigger|0931341515|example@gmail.com|Surgeon
+DOC-511|Dr. Sophia Reyes|09171234501|sophia.reyes@clinic.com|Dermatology
+DOC-512|Dr. Sam Smith|09313415151501|sam.smith@clinic.com|Dermatology
+DOC-513|Dr. Andrea Cruz|09171234503|andrea.cruz@clinic.com|Dermatology
+DOC-514|Dr. Miguel Santos|09171234502|miguel.santos@clinic.com|Dermatology
+DOC-515|Dr. Jandoe Cubs|09714145195|jandoe.cubs@clinic.com|Cardiology
+DOC-516|Dr. Gabriel Mendoza|09171234504|gabriel.mendoza@clinic.com|Cardiology
+DOC-517|Dr. Isabella Torres|09171234505|isabella.torres@clinic.com|Cardiology
+DOC-518|Dr. Nathan Garcia|09171234506|nathan.garcia@clinic.com|Cardiology
+

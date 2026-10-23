@@ -55,7 +55,7 @@ public class AppointmentService {
         }
 
         if (isBlank(reason)) {
-            throw new IllegalArgumentException("Appointment reason is required.");
+            throw new IllegalArgumentException("Appointment purpose is required.");
         }
 
         if (findAppointmentById(appointmentId) != null) {
