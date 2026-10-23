@@ -1,0 +1,982 @@
+{
+  "name": "Clinic_Appointment_Automation_Final",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Appointment",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Appointment File",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "df087162-d6bb-4e71-a873-86b493a71089",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        160
+      ],
+      "webhookId": "ef3d9af2-1274-40b0-87a7-83e7cb4989b5"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Expand each uploaded file into its own item with the binary under a single key 'data'\nconst results = [];\nfor (const item of $input.all()) {\n  const bin = item.binary || {};\n  for (const key of Object.keys(bin)) {\n    results.push({\n      json: { ...item.json, sourceBinaryKey: key, fileName: bin[key].fileName || key },\n      binary: { data: bin[key] },\n    });\n  }\n}\nreturn results;"
+      },
+      "id": "6b07341c-1220-4bdb-9636-0120fc6fb9c4",
+      "name": "Split Files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "id": "a4e44e95-a5e6-4bca-af5b-e34b1108f761",
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        528,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Parse ALL data extracted from the current file.\n\nCurrent local date and time (Asia/Manila):\n{{ $now.setZone('Asia/Manila').toISO() }}\n\nCurrent extracted data:\n{{ JSON.stringify($json) }}\n\nIdentify and parse all records into these three categories:\n1. appointments\n2. patients\n3. doctors\n\nDATA FORMATS\nAppointment: clinic_id|patient_id|doctor_id|date|time|purpose|status\nPatient: patient_id|name|phone_number|email|age|gender|address\nDoctor: doctor_id|name|phone_number|email|specialization\n\nGENERAL RULES\n- Process ALL records found in the current input.\n- Preserve each source record independently.\n- Do NOT match or combine appointments with patients or doctors.\n- Do NOT compare patient_id or doctor_id, and do not remove duplicate records.\n- Preserve original IDs, names, phone numbers, email addresses, purpose, status, date, and time exactly as they appear in the source. Do not rewrite or normalize the original date/time fields.\n- Do not infer missing information or invent values.\n- Ignore empty lines only.\n- Return the appointments, patients, and doctors as separate arrays using the required structured output schema.\n\nAPPOINTMENT DATE/TIME VALIDATION\nFor every appointment, additionally return:\n- date_valid: a Boolean\n- date_validation_reason: a short explanation; use an empty string when valid.\n\nUse the current local date/time shown above, in Asia/Manila, for validation. A date/time is valid only when BOTH the date and time are present, parseable, and represent a real calendar date and real time in one of the formats accepted below:\n- Date: YYYY-M-D or YYYY-MM-DD (year-month-day; impossible dates such as February 30 are invalid).\n- Time: h:mm AM/PM (case-insensitive) or 24-hour H:mm.\n\nSet date_valid to false if the date/time is missing, malformed, impossible, or the scheduled local date/time is earlier than OR equal to the current local date/time. A schedule for today is valid only if its time is still in the future. Set date_valid to true only if the full local date/time is strictly in the future.\n\nSet date_validation_reason to a concise reason, for example:\n- \"Missing date or time.\"\n- \"Invalid date/time format or impossible calendar date/time.\"\n- \"Appointment date/time is not in the future (Asia/Manila).\"\nUse an empty string when date_valid is true.\n\nThis validation applies to appointment records only. Do not change the source date/time strings; validation metadata is additional. Do not add validation fields to patient or doctor records.\n\nReturn ONLY the structured JSON output, with appointments, patients, and doctors as separate arrays.",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are an appointment-file data extraction assistant running inside an n8n workflow.\n\nYour task is to extract and structure all appointment, patient, and doctor records from the CURRENT input, preserving the source values. You must also validate appointment date/time using the current Asia/Manila timestamp supplied in the user message.\n\nCURRENT-TIME AUTHORITY\n- Use only the current date/time explicitly supplied in the user message, in the Asia/Manila time zone.\n- Do not guess the current time and do not use information from previous executions.\n\nDATA FORMATS\nAPPOINTMENT: clinic_id|patient_id|doctor_id|date|time|purpose|status\nPATIENT: patient_id|name|phone_number|email|age|gender|address\nDOCTOR: doctor_id|name|phone_number|email|specialization\n\nFIELD MAPPING\nAppointment fields: clinic_id, patient_id, doctor_id, date, time, purpose, status, date_valid, date_validation_reason.\nPatient fields: patient_id, name, phone_number, email, age, gender, address.\nDoctor fields: doctor_id, name, phone_number, email, specialization.\n\nPARSING RULES\n- Extract every appointment record into the appointments array.\n- Extract every patient record into the patients array.\n- Extract every doctor record into the doctors array.\n- Keep each record independent. Do not match records, compare IDs, connect records, or combine records.\n- Do not remove duplicates.\n- Preserve original values exactly as they appear. Do not change capitalization, IDs, names, phone numbers, email addresses, dates, times, purpose, or status.\n- Do not infer missing information, correct source values, or invent information.\n- Ignore empty lines only and process all records in the current input.\n\nAPPOINTMENT DATE/TIME VALIDATION\nFor each appointment, add a Boolean date_valid and a string date_validation_reason. Do not change the original date or time fields.\n- Use the current Asia/Manila date/time explicitly provided by the user message.\n- Accept date formats YYYY-M-D or YYYY-MM-DD only, with real calendar dates. Reject impossible values such as 2026-02-30.\n- Accept time formats h:mm AM/PM (case-insensitive) or 24-hour H:mm only. Reject impossible times such as 25:90.\n- If date or time is missing, unsupported, malformed, or impossible, set date_valid=false and explain the issue in date_validation_reason.\n- If the combined appointment date/time is earlier than or equal to the supplied current Asia/Manila date/time, set date_valid=false and set date_validation_reason to \"Appointment date/time is not in the future (Asia/Manila).\"\n- A date that is today is not automatically invalid: its time must be strictly later than the supplied current time to be valid.\n- Only set date_valid=true when the date/time is complete, real, parseable, and strictly in the future. When valid, set date_validation_reason to an empty string.\n- Do not add these validation fields to patient or doctor records.\n\nOUTPUT\nReturn only the structured JSON output matching the supplied schema. It must contain separate appointments, patients, and doctors arrays. Never wrap the output in Markdown fences or explanatory prose."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "1efa6fa0-f984-46e2-9ed5-8156deca5c18",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        864,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "2a5673ca-7b97-4f0c-8cf6-6390ff780579",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        608,
+        592
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"appointments\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"clinic_id\": {\n            \"type\": \"string\"\n          },\n          \"patient_id\": {\n            \"type\": \"string\"\n          },\n          \"doctor_id\": {\n            \"type\": \"string\"\n          },\n          \"date\": {\n            \"type\": \"string\"\n          },\n          \"time\": {\n            \"type\": \"string\"\n          },\n          \"purpose\": {\n            \"type\": \"string\"\n          },\n          \"status\": {\n            \"type\": \"string\"\n          },\n          \"date_valid\": {\n            \"type\": \"boolean\"\n          },\n          \"date_validation_reason\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\n          \"clinic_id\",\n          \"patient_id\",\n          \"doctor_id\",\n          \"date\",\n          \"time\",\n          \"purpose\",\n          \"status\",\n          \"date_valid\",\n          \"date_validation_reason\"\n        ]\n      }\n    },\n    \"patients\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"patient_id\": {\n            \"type\": \"string\"\n          },\n          \"name\": {\n            \"type\": \"string\"\n          },\n          \"phone_number\": {\n            \"type\": \"string\"\n          },\n          \"email\": {\n            \"type\": \"string\"\n          },\n          \"age\": {\n            \"type\": \"integer\"\n          },\n          \"gender\": {\n            \"type\": \"string\"\n          },\n          \"address\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\n          \"patient_id\",\n          \"name\",\n          \"phone_number\",\n          \"email\",\n          \"age\",\n          \"gender\",\n          \"address\"\n        ]\n      }\n    },\n    \"doctors\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"doctor_id\": {\n            \"type\": \"string\"\n          },\n          \"name\": {\n            \"type\": \"string\"\n          },\n          \"phone_number\": {\n            \"type\": \"string\"\n          },\n          \"email\": {\n            \"type\": \"string\"\n          },\n          \"specialization\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\n          \"doctor_id\",\n          \"name\",\n          \"phone_number\",\n          \"email\",\n          \"specialization\"\n        ]\n      }\n    }\n  },\n  \"required\": [\n    \"appointments\",\n    \"patients\",\n    \"doctors\"\n  ]\n}"
+      },
+      "id": "45c317f1-4b34-40b0-8b33-2d8f07a73cec",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1056,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\nconst allAppointments = [];\nconst allPatients = [];\nconst allDoctors = [];\n\n// Collect data from all LLM output items.\nfor (const item of $input.all()) {\n  const output = item.json.output || {};\n  if (Array.isArray(output.appointments)) allAppointments.push(...output.appointments);\n  if (Array.isArray(output.patients)) allPatients.push(...output.patients);\n  if (Array.isArray(output.doctors)) allDoctors.push(...output.doctors);\n}\n\n// Use a deterministic local clock for validation. This Code node is authoritative;\n// it does not rely on the LLM's date_valid assessment.\nconst nowManila = DateTime.now().setZone('Asia/Manila');\n\nfor (const appointment of allAppointments) {\n  const patient = allPatients.find(p =>\n    String(p.patient_id ?? '').trim() === String(appointment.patient_id ?? '').trim()\n  );\n  const doctor = allDoctors.find(d =>\n    String(d.doctor_id ?? '').trim() === String(appointment.doctor_id ?? '').trim()\n  );\n\n  const rawDate = String(appointment.date ?? '').trim();\n  const rawTime = String(appointment.time ?? '').trim();\n\n  let dt = DateTime.invalid('Missing or invalid date/time');\n  let parseAttempted = false;\n  let validationReason = '';\n\n  if (rawDate && rawTime) {\n    // Strictly parse only the formats supported by this workflow.\n    dt = DateTime.fromFormat(`${rawDate} ${rawTime}`, 'yyyy-M-d h:mm a', {\n      zone: 'Asia/Manila',\n      locale: 'en-US'\n    });\n    parseAttempted = true;\n\n    if (!dt.isValid) {\n      dt = DateTime.fromFormat(`${rawDate} ${rawTime}`, 'yyyy-M-d H:mm', {\n        zone: 'Asia/Manila',\n        locale: 'en-US'\n      });\n    }\n  } else {\n    validationReason = 'Missing date or time.';\n  }\n\n  let dateValid = false;\n  let formattedDate = rawDate;\n  let formattedTime = rawTime;\n  let startIso = null;\n  let endIso = null;\n\n  if (!validationReason && (!parseAttempted || !dt.isValid)) {\n    validationReason = 'Invalid date/time format or impossible calendar date/time.';\n  } else if (!validationReason && dt.isValid && dt.toMillis() <= nowManila.toMillis()) {\n    validationReason = 'Appointment date/time is not in the future (Asia/Manila).';\n  } else if (!validationReason && dt.isValid) {\n    dateValid = true;\n    formattedDate = dt.toFormat('MMMM d, yyyy');\n    formattedTime = dt.toFormat('h:mm a');\n    startIso = dt.toISO();\n    endIso = dt.plus({ hours: 1 }).toISO();\n  }\n\n  // Keep readable normalized values when parsing succeeded, even if the date/time is past.\n  if (dt.isValid) {\n    formattedDate = dt.toFormat('MMMM d, yyyy');\n    formattedTime = dt.toFormat('h:mm a');\n  }\n\n  const doctorName = doctor?.name || 'N/A';\n  const specialization = doctor?.specialization || 'N/A';\n  const appointmentDetails = `Patient ID: ${appointment.patient_id || 'N/A'}\nDoctor: ${doctorName}\nSpecialization: ${specialization}\nDate: ${formattedDate}\nTime: ${formattedTime}\nPurpose: ${appointment.purpose || 'N/A'}\nStatus: ${appointment.status || 'N/A'}\nValidation: ${dateValid ? 'VALID' : 'INVALID'}${validationReason ? ` - ${validationReason}` : ''}\n\n📍 Clinic: ${appointment.clinic_id || 'N/A'}`;\n\n  results.push({\n    json: {\n      clinic_id: appointment.clinic_id,\n      patient_id: appointment.patient_id,\n      doctor_id: appointment.doctor_id,\n      date: appointment.date,\n      time: appointment.time,\n      purpose: appointment.purpose,\n      status: appointment.status,\n      // Deterministic values override any LLM-provided validation flags.\n      date_valid: dateValid,\n      date_validation_reason: validationReason,\n      patient_name: patient?.name || appointment.patient_id || 'Patient',\n      patient_email: patient?.email || '',\n      doctor_name: doctorName,\n      specialization,\n      formatted_date: formattedDate,\n      formatted_time: formattedTime,\n      start_iso: startIso,\n      end_iso: endIso,\n      appointment_details: appointmentDetails\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "712a9dbb-8a92-44c4-a0a1-d16a03596f7d",
+      "name": "Collect Appointments",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Collect Appointments').item.json.patient_email }}",
+        "subject": "=Clinic Appointment Confirmation - {{ $('Collect Appointments').item.json.formatted_date }}",
+        "emailType": "text",
+        "message": "=Dear {{ $('Collect Appointments').item.json.patient_name }},\n\nYour clinic appointment has been successfully scheduled.\n\n📋 APPOINTMENT DETAILS\n\nPatient ID: {{ $('Collect Appointments').item.json.patient_id }}\nDoctor: {{ $('Collect Appointments').item.json.doctor_name }}\nSpecialization: {{ $('Collect Appointments').item.json.specialization }}\nDate: {{ $('Collect Appointments').item.json.date }}\nTime: {{ $('Collect Appointments').item.json.time }}\nPurpose: {{ $('Collect Appointments').item.json.purpose }}\nStatus: {{ $('Collect Appointments').item.json.status }}\n\n📍 Clinic: {{ $('Collect Appointments').item.json.clinic_id }}\n\nPlease arrive at the clinic 10–15 minutes before your scheduled appointment.\n\nIf you need to reschedule or cancel your appointment, please contact the clinic.\n\nThank you,\nClinic Appointment System",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2656,
+        672
+      ],
+      "id": "958f7dd5-2989-4196-a1d8-236db789690d",
+      "name": "Send a message",
+      "webhookId": "ec60c18b-8b34-4409-b63c-6007becdd1b8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "g7XyCPynS0Sc7SOE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "13149a06770b822260b2d18822e1b7e09450ffc14f6120de05f61db57515c11c@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Book Appointment"
+        },
+        "timeMin": "={{ DateTime.fromISO($json.start_iso).minus({ days: 30 }).toISO() }}",
+        "timeMax": "={{ DateTime.fromISO($json.start_iso).plus({ days: 30 }).toISO() }}",
+        "options": {
+          "query": "={{ $json.patient_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2000,
+        16
+      ],
+      "id": "bfdab2c8-4abb-418b-86c8-40f5f13befdb",
+      "name": "Get many events",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": false,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "kckkXESQLliClRA0",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "13149a06770b822260b2d18822e1b7e09450ffc14f6120de05f61db57515c11c@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Book Appointment"
+        },
+        "start": "={{ $json.start_iso }}",
+        "end": "={{ $json.end_iso }}",
+        "additionalFields": {
+          "description": "=Appointment ID: {{ $json.clinic_id }}\nPatient ID: {{ $json.patient_id }}\nPatient Name: {{ $json.patient_name }}\nDoctor ID: {{ $json.doctor_id }}\nDoctor: {{ $json.doctor_name }}\nClinic: {{ $json.clinic_id }}\nPurpose: {{ $json.purpose }}\nStatus: {{ $json.status }}",
+          "summary": "={{ $json.purpose }}"
+        }
+      },
+      "id": "41f8998c-8b33-4b41-b4b8-ee04c288f146",
+      "name": "Create an event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2176,
+        608
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "kckkXESQLliClRA0",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3013948d-8fb3-4f12-b25c-93bf3c6d0930",
+              "leftValue": "={{ $json.date_valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1472,
+        160
+      ],
+      "id": "d144d231-f6d9-4877-a5e4-a60f0e0e5f99",
+      "name": "IF DATE VALID?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f8c5281e-03b2-4ec4-bf5b-db9ce678b571",
+              "leftValue": "={{ String($json.status ?? '').trim().toUpperCase() }}",
+              "rightValue": "RESCHEDULED",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1728,
+        144
+      ],
+      "id": "01cb48ab-d07c-408d-9909-6ab62211eab4",
+      "name": "IF RESCHEDULED?"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "13149a06770b822260b2d18822e1b7e09450ffc14f6120de05f61db57515c11c@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Book Appointment"
+        },
+        "eventId": "={{ $json.eventId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2432,
+        16
+      ],
+      "id": "c0c116f0-6db7-43a1-9c41-5ff50b534429",
+      "name": "Delete an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "kckkXESQLliClRA0",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Find Matching Appointment').item.json.patient_email }}",
+        "subject": "=Appointment Rescheduled - {{ $('Find Matching Appointment').item.json.appointmentId }}",
+        "emailType": "text",
+        "message": "=Dear {{ $('Find Matching Appointment').item.json.patient_name }},\n\nYour clinic appointment has been successfully rescheduled.\n\nUPDATED APPOINTMENT DETAILS\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nAppointment ID: {{ $('Find Matching Appointment').item.json.appointmentId }}\n\nPatient: {{ $('Find Matching Appointment').item.json.patient_name }}\nDoctor: Dr. {{ $('Find Matching Appointment').item.json.doctor_name }}\nSpecialization: {{ $('Find Matching Appointment').item.json.specialization }}\n\nNew Date: {{ $('Find Matching Appointment').item.json.date }}\nNew Time: {{ $('Find Matching Appointment').item.json.time }}\n\nReason: {{ $('Find Matching Appointment').item.json.purpose }}\n\nStatus: {{ $('Find Matching Appointment').item.json.status }}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nThe previous appointment schedule has been removed from the clinic calendar and replaced with your new appointment schedule.\n\nPlease arrive at the clinic a few minutes before your scheduled appointment time.\n\nIf you need to make another change or cancel your appointment, please contact the clinic.\n\nThank you for choosing our clinic.\n\nBest regards,\n\nClinic Appointment Management System",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3168,
+        0
+      ],
+      "id": "d9b65b74-0989-430b-bb4e-7639f3013719",
+      "name": "Send a message1",
+      "webhookId": "f14342ce-9a11-40d9-82de-a174ff5e8204",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "g7XyCPynS0Sc7SOE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Match the current RESCHEDULED appointment to an existing Google Calendar event.\nconst source = $('Collect Appointments').all();\nconst appointmentData = source.find(item =>\n  String(item.json.status ?? '').trim().toUpperCase() === 'RESCHEDULED'\n)?.json;\n\nif (!appointmentData) {\n  throw new Error('No RESCHEDULED appointment found in Collect Appointments.');\n}\n\nconst appointmentId = String(appointmentData.clinic_id ?? '').trim();\nconst patientId = String(appointmentData.patient_id ?? '').trim();\nconst doctorId = String(appointmentData.doctor_id ?? '').trim();\nconst purpose = String(appointmentData.purpose ?? '').trim();\n\nconst events = $input.all();\nconst matchingEvent = events.find(item => {\n  const event = item.json ?? {};\n  const description = String(event.description ?? '');\n  const summary = String(event.summary ?? '');\n\n  // Preferred stable match: the appointment ID is saved in the event description.\n  if (appointmentId && description.includes(`Appointment ID: ${appointmentId}`)) {\n    return true;\n  }\n\n  // Fallback for older events created before Appointment ID was saved.\n  const patientMatch =\n    description.includes(`Patient ID: ${patientId}`) ||\n    description.includes(`Appointment Patient ID: ${patientId}`) ||\n    description.includes(`Patient: ${patientId}`);\n  const doctorMatch =\n    description.includes(`Doctor ID: ${doctorId}`) ||\n    description.includes(`Doctor: ${doctorId}`);\n  const purposeMatch = !purpose || summary.toLowerCase() === purpose.toLowerCase();\n\n  return Boolean(patientId && doctorId && patientMatch && doctorMatch && purposeMatch);\n});\n\nif (!matchingEvent) {\n  throw new Error(\n    `No calendar event found for appointment ${appointmentId}. ` +\n    `Patient: ${patientId}, Doctor: ${doctorId}. ` +\n    `Older events may need an Appointment ID in their description or a matching Patient ID/Doctor ID.`\n  );\n}\n\nreturn [{\n  json: {\n    eventId: matchingEvent.json.id,\n    appointmentId,\n    clinic_id: appointmentData.clinic_id,\n    patient_id: appointmentData.patient_id,\n    patient_name: appointmentData.patient_name,\n    patient_email: appointmentData.patient_email,\n    doctor_id: appointmentData.doctor_id,\n    doctor_name: appointmentData.doctor_name,\n    specialization: appointmentData.specialization,\n    date: appointmentData.date,\n    time: appointmentData.time,\n    purpose: appointmentData.purpose,\n    status: appointmentData.status,\n    start_iso: appointmentData.start_iso,\n    end_iso: appointmentData.end_iso\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2224,
+        16
+      ],
+      "id": "218d7b5b-18cb-4c28-938b-af77c0900237",
+      "name": "Find Matching Appointment"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "13149a06770b822260b2d18822e1b7e09450ffc14f6120de05f61db57515c11c@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Book Appointment"
+        },
+        "start": "={{ $('Find Matching Appointment').item.json.start_iso }}",
+        "end": "={{ $('Find Matching Appointment').item.json.end_iso }}",
+        "additionalFields": {
+          "description": "=Appointment ID: {{ $('Find Matching Appointment').item.json.appointmentId }}\nPatient ID: {{ $('Find Matching Appointment').item.json.patient_id }}\nPatient Name: {{ $('Find Matching Appointment').item.json.patient_name }}\nDoctor ID: {{ $('Find Matching Appointment').item.json.doctor_id }}\nDoctor: {{ $('Find Matching Appointment').item.json.doctor_name }}\nPurpose: {{ $('Find Matching Appointment').item.json.purpose }}\nStatus: {{ $('Find Matching Appointment').item.json.status }}",
+          "summary": "=Appointment - {{ $('Find Matching Appointment').item.json.patient_name }} - {{ $('Find Matching Appointment').item.json.purpose }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2672,
+        16
+      ],
+      "id": "26536f3d-a1e7-4b6f-b0ef-667557e42331",
+      "name": "Create an event1",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "kckkXESQLliClRA0",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "phase-cancelled-status-condition",
+              "leftValue": "={{ String($json.status ?? '').trim().toUpperCase() }}",
+              "rightValue": "CANCELLED",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "164031fb-97ba-4a53-9201-dab0b60008de",
+      "name": "IF CANCELLED?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1984,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "13149a06770b822260b2d18822e1b7e09450ffc14f6120de05f61db57515c11c@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Book Appointment"
+        },
+        "timeMin": "={{ DateTime.fromISO($json.start_iso).minus({ days: 30 }).toISO() }}",
+        "timeMax": "={{ DateTime.fromISO($json.start_iso).plus({ days: 30 }).toISO() }}",
+        "options": {
+          "query": "={{ $json.patient_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2368,
+        256
+      ],
+      "id": "27748db8-038e-4424-a115-36720259ce0d",
+      "name": "Get events for cancellation",
+      "alwaysOutputData": true,
+      "executeOnce": false,
+      "retryOnFail": false,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "kckkXESQLliClRA0",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Find the Google Calendar event for the current CANCELLED appointment.\nconst source = $('Collect Appointments').all();\nconst appointmentData = source.find(item =>\n  String(item.json.status ?? '').trim().toUpperCase() === 'CANCELLED'\n)?.json;\n\nif (!appointmentData) {\n  throw new Error('No CANCELLED appointment found in Collect Appointments.');\n}\n\nconst appointmentId = String(appointmentData.clinic_id ?? '').trim();\nconst patientId = String(appointmentData.patient_id ?? '').trim();\nconst doctorId = String(appointmentData.doctor_id ?? '').trim();\nconst purpose = String(appointmentData.purpose ?? '').trim();\n\nconst events = $input.all();\nconst matchingEvent = events.find(item => {\n  const event = item.json ?? {};\n  const description = String(event.description ?? '');\n  const summary = String(event.summary ?? '');\n\n  if (appointmentId && description.includes(`Appointment ID: ${appointmentId}`)) {\n    return true;\n  }\n\n  // Fallback for older events that do not contain Appointment ID.\n  const patientMatch =\n    description.includes(`Patient ID: ${patientId}`) ||\n    description.includes(`Appointment Patient ID: ${patientId}`) ||\n    description.includes(`Patient: ${patientId}`);\n  const doctorMatch =\n    description.includes(`Doctor ID: ${doctorId}`) ||\n    description.includes(`Doctor: ${doctorId}`);\n  const purposeMatch = !purpose || summary.toLowerCase() === purpose.toLowerCase();\n\n  return Boolean(patientId && doctorId && patientMatch && doctorMatch && purposeMatch);\n});\n\nreturn [{\n  json: {\n    found: Boolean(matchingEvent?.json?.id),\n    eventId: matchingEvent?.json?.id ?? '',\n    appointmentId,\n    clinic_id: appointmentData.clinic_id,\n    patient_id: appointmentData.patient_id,\n    patient_name: appointmentData.patient_name,\n    patient_email: appointmentData.patient_email,\n    doctor_id: appointmentData.doctor_id,\n    doctor_name: appointmentData.doctor_name,\n    specialization: appointmentData.specialization,\n    date: appointmentData.date,\n    time: appointmentData.time,\n    purpose: appointmentData.purpose,\n    status: appointmentData.status\n  }\n}];"
+      },
+      "id": "17d3f77d-601e-4e0b-900c-ae2683ef159a",
+      "name": "Find Matching Cancellation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2720,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cancel-event-found-condition",
+              "leftValue": "={{ $json.found }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b011153a-8a64-46f3-9fb4-c5953c5cae9a",
+      "name": "IF Cancellation Event Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3168,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "13149a06770b822260b2d18822e1b7e09450ffc14f6120de05f61db57515c11c@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Book Appointment"
+        },
+        "eventId": "={{ $('Find Matching Cancellation').item.json.eventId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2912,
+        544
+      ],
+      "id": "0cded880-49ba-4bab-9368-f5fef92a1f7f",
+      "name": "Delete Cancelled Event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "kckkXESQLliClRA0",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Find Matching Cancellation').item.json.patient_email }}",
+        "subject": "=Clinic Appointment Cancelled - {{ $('Find Matching Cancellation').item.json.appointmentId }}",
+        "emailType": "text",
+        "message": "=Dear {{ $('Find Matching Cancellation').item.json.patient_name || 'Patient' }},\n\nYour clinic appointment has been marked as cancelled, and the matching Google Calendar event has been removed.\n\nAppointment ID: {{ $('Find Matching Cancellation').item.json.appointmentId }}\nDoctor: {{ $('Find Matching Cancellation').item.json.doctor_name || 'N/A' }}\nDate: {{ $('Find Matching Cancellation').item.json.date }}\nTime: {{ $('Find Matching Cancellation').item.json.time }}\nPurpose: {{ $('Find Matching Cancellation').item.json.purpose }}\n\nIf you believe this cancellation is incorrect, please contact the clinic.\n\nThank you,\nClinic Appointment Management System",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3120,
+        864
+      ],
+      "id": "28c5958c-af58-45b3-bf2a-e37ffa340dc3",
+      "name": "Send Cancellation Email",
+      "webhookId": "ec60c18b-8b34-4409-b63c-6007becdd1b8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "g7XyCPynS0Sc7SOE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4b7b78f0-0e19-4b2c-a7d3-confirmemail-condition",
+              "leftValue": "={{ String($('Collect Appointments').item.json.patient_email ?? '').trim() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a9480818-e54b-4b77-8c80-b54c5eacc79e",
+      "name": "IF Patient Email Available?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2384,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4b7b78f0-0e19-4b2c-a7d3-reschemail-condition",
+              "leftValue": "={{ String($json.patient_email ?? '').trim() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a14ebf0d-22db-46d1-8903-56ffe2cbbdf7",
+      "name": "IF Reschedule Email Available?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2880,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4b7b78f0-0e19-4b2c-a7d3-cancelemail-condition",
+              "leftValue": "={{ String($('Find Matching Cancellation').first().json.patient_email ?? '').trim() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c03082f1-e755-4ef1-9b3e-a24a5200c5da",
+      "name": "IF Cancellation Email Available?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3392,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-5.6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        752,
+        368
+      ],
+      "id": "b7190016-5ac6-4580-b567-eb909536e218",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.patient_email }}",
+        "subject": "=Invalid Appointment Date/Time – Action Required",
+        "emailType": "text",
+        "message": "=Dear {{ $json.patient_name || \"Patient\" }},\n\nWe’re sorry, but the appointment date and time you submitted are invalid or have already passed. Unfortunately, we cannot process your appointment request using the submitted schedule.\n\nYour Submitted Appointment Details\n\nAppointment Reference: {{ $json.clinic_id || \"Not provided\" }}\nDoctor: {{ $json.doctor_name || \"Not provided\" }}\nSubmitted Date: {{ $json.date || \"Not provided\" }}\nSubmitted Time: {{ $json.time || \"Not provided\" }}\nPurpose: {{ $json.purpose || \"Not provided\" }}\n\nWhat would you like to do next?\n\nPlease use the Google Form below to select one of these options:\n\n1. Reschedule Appointment\n2. Cancel Appointment\n\nAppointment Form:\nhttps://forms.gle/bfbNC3SV3gFpoaDM9\n\nPlease select your preferred option, provide the required information, and submit the form. Your new schedule or cancellation request will be processed only after a valid response is received and successfully processed by our system.\n\nWe apologize for the inconvenience and appreciate your understanding.\n\nBest regards,\nClinic Appointment System",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1712,
+        384
+      ],
+      "id": "3eaf3393-13ca-41c5-82e3-b2bc4dce56d2",
+      "name": "Send a message2",
+      "webhookId": "95b82f5f-b6bf-4ee5-a060-c50fa95ba67a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "g7XyCPynS0Sc7SOE",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Split Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Files": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Collect Appointments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Appointments": {
+      "main": [
+        [
+          {
+            "node": "IF DATE VALID?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "Find Matching Appointment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "IF Patient Email Available?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF DATE VALID?": {
+      "main": [
+        [
+          {
+            "node": "IF RESCHEDULED?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF RESCHEDULED?": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF CANCELLED?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete an event": {
+      "main": [
+        [
+          {
+            "node": "Create an event1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Matching Appointment": {
+      "main": [
+        [
+          {
+            "node": "Delete an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event1": {
+      "main": [
+        [
+          {
+            "node": "IF Reschedule Email Available?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF CANCELLED?": {
+      "main": [
+        [
+          {
+            "node": "Get events for cancellation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get events for cancellation": {
+      "main": [
+        [
+          {
+            "node": "Find Matching Cancellation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Matching Cancellation": {
+      "main": [
+        [
+          {
+            "node": "IF Cancellation Event Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Cancellation Event Found?": {
+      "main": [
+        [
+          {
+            "node": "Delete Cancelled Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Cancelled Event": {
+      "main": [
+        [
+          {
+            "node": "IF Cancellation Email Available?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Patient Email Available?": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Reschedule Email Available?": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Cancellation Email Available?": {
+      "main": [
+        [
+          {
+            "node": "Send Cancellation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1f8bd14a-00d0-4d88-85b9-2d890808a3a6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f68c1bd59c2b46d481764f4386c75f536aa233c5bf157116416d3e0f0eaffb72"
+  },
+  "nodeGroups": [],
+  "id": "dR1xTuUbTLCzO18c",
+  "tags": []
+}
