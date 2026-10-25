@@ -26,9 +26,9 @@ public class AppointmentService {
             new DateTimeFormatterBuilder()
                     .parseCaseInsensitive()
                     .appendPattern("h:mm a")
-                    .toFormatter(Locale.US);
+                    .toFormatter(Locale.US).withResolverStyle(ResolverStyle.STRICT);
 
-    private static final DateTimeFormatter TIME_24_HOUR = DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter TIME_24_HOUR = DateTimeFormatter.ofPattern("H:mm").withResolverStyle(ResolverStyle.STRICT);
 
     private static final DateTimeFormatter DISPLAY_TIME = DateTimeFormatter.ofPattern("hh:mm a", Locale.US);
 
@@ -65,6 +65,7 @@ public class AppointmentService {
         String validDate = normalizeDate(date);
         String validTime = normalizeTime(time);
 
+        checkSchedule(doctor, validDate, validTime);
         checkDoctorConflict(doctor.getId(), validDate, validTime, null);
 
         Appointment appointment = new Appointment(
@@ -83,7 +84,7 @@ public class AppointmentService {
     // READ
     public List<Appointment> getAllAppointments() {
     	
-        return appointments;
+        return java.util.Collections.unmodifiableList(appointments);
     }
 
     public Appointment findAppointmentById(String id) {
@@ -137,6 +138,7 @@ public class AppointmentService {
             throw new AppointmentUnavailableException(e.getMessage());
         }
 
+        checkSchedule(appointment.getDoctor(), validDate, validTime);
         checkDoctorConflict(
                 appointment.getDoctor().getId(),
                 validDate,
@@ -206,6 +208,28 @@ public class AppointmentService {
         System.out.println("Appointment completed successfully.");
     }
 
+    private void checkSchedule(Doctor doctor, String date, String time)
+            throws AppointmentUnavailableException {
+        for (model.Schedule schedule : doctor.getSchedules()) {
+            if (schedule.getDoctorId().equalsIgnoreCase(doctor.getId()) && schedule.covers(date, time)) return;
+        }
+        throw new AppointmentUnavailableException("Doctor has no available schedule on " + date + " at " + time + ".");
+    }
+
+    /** Restore historical records without applying today's schedule rules. */
+    public void restoreAppointment(Appointment appointment) {
+        if (appointment == null || appointment.getPatient() == null || appointment.getDoctor() == null
+                || isBlank(appointment.getAppointmentId()) || findAppointmentById(appointment.getAppointmentId()) != null)
+            throw new IllegalArgumentException("Invalid or duplicate stored appointment.");
+        String date = normalizeDate(appointment.getDate());
+        String time = normalizeTime(appointment.getTime());
+        String status = appointment.getStatus();
+        if (!java.util.Arrays.asList("CONFIRMED", "RESCHEDULED", "CANCELLED", "COMPLETED").contains(status))
+            throw new IllegalArgumentException("Invalid stored appointment status.");
+        appointment.setDate(date); appointment.setTime(time);
+        appointments.add(appointment);
+    }
+
     // CHECK DOCTOR AVAILABILITY
     private void checkDoctorConflict(
             String doctorId,
@@ -235,7 +259,7 @@ public class AppointmentService {
 
             boolean sameDate = existing.getDate().equals(date);
 
-            boolean sameTime = existing.getTime().equals(time);
+            boolean sameTime = normalizeTime(existing.getTime()).equals(time);
 
             if (sameDoctor && sameDate && sameTime) {
                 throw new AppointmentUnavailableException( "Doctor is already booked on " + date + " at " + time + ".");

@@ -23,6 +23,10 @@ public class PatientService {
             throw new IllegalArgumentException("Patient cannot be null.");
         }
 
+        if (patient.getAge() <= 0) {
+            throw new IllegalArgumentException("Age must be greater than zero.");
+        }
+
         if (findPatientWithoutException(patient.getId()) != null) {
             throw new IllegalArgumentException("Patient ID already exists.");
         }
@@ -33,7 +37,7 @@ public class PatientService {
 
     // READ
     public List<Patient> getAllPatients() {
-        return patients;
+        return java.util.Collections.unmodifiableList(patients);
     }
 
     public Patient findPatientById(String id)

@@ -6,4 +6,3 @@ DOC-515|Dr. Jandoe Cubs|09714145195|jandoe.cubs@clinic.com|Cardiology
 DOC-516|Dr. Gabriel Mendoza|09171234504|gabriel.mendoza@clinic.com|Cardiology
 DOC-517|Dr. Isabella Torres|09171234505|isabella.torres@clinic.com|Cardiology
 DOC-518|Dr. Nathan Garcia|09171234506|nathan.garcia@clinic.com|Cardiology
-

@@ -3,6 +3,7 @@ package repository;
 import model.Appointment;
 import model.Doctor;
 import model.Patient;
+import model.Schedule;
 
 import java.io.*;
 import java.util.List;
@@ -68,6 +69,7 @@ public class FileManager {
             }
 
             System.out.println("Doctors saved successfully.");
+            saveSchedules(doctors);
 
         } catch (IOException e) {
 
@@ -131,29 +133,25 @@ public class FileManager {
 
             while ((line = reader.readLine()) != null) {
 
-                String[] data = line.split("\\|");
+                String[] data = line.split("\\|", -1);
 
                 if (data.length != 7) {
                     continue;
                 }
 
-                Patient patient = new Patient(
-                        data[0],
-                        data[1],
-                        data[2],
-                        data[3],
-                        Integer.parseInt(data[4]),
-                        data[5],
-                        data[6]
-                );
-
-                patients.add(patient);
+                try {
+                    Patient patient = new Patient(data[0], data[1], data[2], data[3],
+                            Integer.parseInt(data[4].trim()), data[5], data[6]);
+                    patients.add(patient);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Skipping invalid patient row: " + e.getMessage());
+                }
             }
 
             System.out.println("Patients loaded successfully."
             );
 
-        } catch (IOException | NumberFormatException e) {
+        } catch (IOException e) {
 
             System.out.println("Error loading patients: " + e.getMessage());
         }
@@ -177,7 +175,7 @@ public class FileManager {
 
             while ((line = reader.readLine()) != null) {
 
-                String[] data = line.split("\\|");
+                String[] data = line.split("\\|", -1);
 
                 if (data.length != 5) {
                     continue;
@@ -194,6 +192,7 @@ public class FileManager {
                 doctors.add(doctor);
             }
 
+            loadSchedules(doctors);
             System.out.println("Doctors loaded successfully.");
 
         } catch (IOException e) {
@@ -220,7 +219,7 @@ public class FileManager {
 
             while ((line = reader.readLine()) != null) {
 
-                String[] data = line.split("\\|");
+                String[] data = line.split("\\|", -1);
 
                 if (data.length != 7) {
                     continue;
@@ -257,6 +256,44 @@ public class FileManager {
             System.out.println("Error loading appointments: " + e.getMessage()
             );
         }
+    }
+
+    // Schedule records: ID|doctor ID|weekday or ISO date|start|end|available
+    public static void saveSchedules(List<Doctor> doctors) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("schedules.txt"))) {
+            for (Doctor doctor : doctors) for (Schedule s : doctor.getSchedules()) {
+                writer.write(String.join("|", s.getScheduleId(), s.getDoctorId(), s.getDate(),
+                        s.getTime(), s.getEndTime(), Boolean.toString(s.isAvailable())));
+                writer.newLine();
+            }
+            System.out.println("Schedules saved successfully.");
+        } catch (IOException e) { System.out.println("Error saving schedules: " + e.getMessage()); }
+    }
+
+    public static void loadSchedules(List<Doctor> doctors) {
+        File file = new File("schedules.txt");
+        if (!file.exists()) return;
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            int row = 0;
+            while ((line = reader.readLine()) != null) {
+                row++;
+                if (line.trim().isEmpty() || line.startsWith("#")) continue;
+                try {
+                    String[] data = line.split("\\|", -1);
+                    if (data.length != 6) throw new IllegalArgumentException("Expected six fields.");
+                    Doctor doctor = findDoctor(doctors, data[1].trim());
+                    if (doctor == null) throw new IllegalArgumentException("Unknown doctor.");
+                    if (!data[5].equalsIgnoreCase("true") && !data[5].equalsIgnoreCase("false"))
+                        throw new IllegalArgumentException("Availability must be true or false.");
+                    Schedule schedule = new Schedule(data[0], data[1], data[2], data[3], data[4]);
+                    schedule.setAvailable(Boolean.parseBoolean(data[5]));
+                    doctor.addSchedule(schedule);
+                } catch (IllegalArgumentException | java.time.DateTimeException e) {
+                    System.out.println("Skipping schedule row " + row + ": " + e.getMessage());
+                }
+            }
+        } catch (IOException e) { System.out.println("Error loading schedules: " + e.getMessage()); }
     }
 
     private static Patient findPatient(List<Patient> patients, String id) {

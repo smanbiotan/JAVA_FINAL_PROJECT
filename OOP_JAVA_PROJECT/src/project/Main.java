@@ -254,6 +254,8 @@ public class Main {
             System.out.println("2. View All Doctors");
             System.out.println("3. Update Doctor");
             System.out.println("4. Delete Doctor");
+            System.out.println("5. View Doctor Schedules");
+            System.out.println("6. Add Doctor Schedule");
             System.out.println("0. Back");
 
             choice = readInt("Enter choice: ");
@@ -278,6 +280,8 @@ public class Main {
                         deleteDoctor();
                         break;
 
+                    case 5: viewSchedules(); break;
+                    case 6: addSchedule(); break;
                     case 0:
                         break;
 
@@ -365,6 +369,24 @@ public class Main {
         String id = readRequiredString("Doctor ID: ");
 
         doctorService.deleteDoctor(id, appointmentService.getAllAppointments());
+    }
+
+    private static void viewSchedules() {
+        for (Doctor doctor : doctorService.getAllDoctors()) {
+            System.out.println("\n" + doctor.getId() + " | " + doctor.getName());
+            if (doctor.getSchedules().isEmpty()) System.out.println("No schedule configured; new bookings unavailable.");
+            for (Schedule schedule : doctor.getSchedules()) System.out.println(schedule);
+        }
+    }
+
+    private static void addSchedule() throws DoctorNotFoundException {
+        Doctor doctor = doctorService.findDoctorById(readRequiredString("Doctor ID: "));
+        String id = readRequiredString("Schedule ID (unique for doctor): ");
+        String day = readRequiredString("Weekday (e.g. MONDAY) or date (YYYY-MM-DD): ");
+        String start = readRequiredString("Start time (e.g. 8:00 AM): ");
+        String end = readRequiredString("End time (exclusive; same as start for a single slot): ");
+        doctor.addSchedule(new Schedule(id, doctor.getId(), day, start, end));
+        System.out.println("Schedule added. Save Data or exit normally to save.");
     }
 
     // APPOINTMENT MENU
@@ -592,12 +614,24 @@ public class Main {
 
     private static void loadData() {
 
-        FileManager.loadPatients(patientService.getAllPatients());
-
-        FileManager.loadDoctors(doctorService.getAllDoctors());
-
-        FileManager.loadAppointments(appointmentService.getAllAppointments(),
-        		patientService.getAllPatients(),doctorService.getAllDoctors());
+        java.util.List<Patient> patients = new java.util.ArrayList<>();
+        java.util.List<Doctor> doctors = new java.util.ArrayList<>();
+        java.util.List<Appointment> appointments = new java.util.ArrayList<>();
+        FileManager.loadPatients(patients);
+        FileManager.loadDoctors(doctors); // Also loads schedules.txt.
+        for (Patient patient : patients) {
+            try { patientService.addPatient(patient); }
+            catch (IllegalArgumentException e) { System.out.println("Skipping patient: " + e.getMessage()); }
+        }
+        for (Doctor doctor : doctors) {
+            try { doctorService.addDoctor(doctor); }
+            catch (IllegalArgumentException e) { System.out.println("Skipping doctor: " + e.getMessage()); }
+        }
+        FileManager.loadAppointments(appointments, patientService.getAllPatients(), doctorService.getAllDoctors());
+        for (Appointment appointment : appointments) {
+            try { appointmentService.restoreAppointment(appointment); }
+            catch (IllegalArgumentException e) { System.out.println("Skipping appointment: " + e.getMessage()); }
+        }
     }
 
     // POLYMORPHISM DEMO

@@ -31,7 +31,7 @@ public class DoctorService {
 
     // READ
     public List<Doctor> getAllDoctors() {
-        return doctors;
+        return java.util.Collections.unmodifiableList(doctors);
     }
 
     public Doctor findDoctorById(String id)

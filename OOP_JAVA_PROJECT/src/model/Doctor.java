@@ -35,11 +35,17 @@ public class Doctor extends Person {
 
     public List<Schedule> getSchedules() {
     	
-        return schedules;
+        return java.util.Collections.unmodifiableList(schedules);
     }
 
     public void addSchedule(Schedule schedule) {
     	
+        if (schedule == null || !getId().equalsIgnoreCase(schedule.getDoctorId()))
+            throw new IllegalArgumentException("Schedule must belong to this doctor.");
+        for (Schedule existing : schedules) {
+            if (existing.getScheduleId().equalsIgnoreCase(schedule.getScheduleId()))
+                throw new IllegalArgumentException("Duplicate schedule ID for doctor.");
+        }
         schedules.add(schedule);
     }
 

@@ -1,0 +1,389 @@
+========== BEGIN PHASE 5 TEST OUTPUT ==========
+Executed: 2026-10-24T08:35:16.411180452-06:00[America/Edmonton]
+Java: 17.0.20 / Ubuntu
+OS: Linux 6.18.55 / amd64
+Suite: 21 baseline cases T01-T21; 5 robustness cases G01-G05; 8 scheduling cases S01-S08.
+All file operations take place in isolated temporary folders.
+
+============================================================
+TEST T01 | BASELINE
+EXPECTED: Compile all application sources successfully with the current JDK
+------------------------------------------------------------
+Application source files compiled: 16
+Compiler exit code: 0
+Separate classpath compilation; module-info.java and test sources are excluded.
+RESULT|T01|PASS|All assertions satisfied
+
+============================================================
+TEST T02 | BASELINE
+EXPECTED: Patient CRUD and case-insensitive ID lookup succeed
+------------------------------------------------------------
+Patient added successfully.
+Patient updated successfully.
+Patient deleted successfully.
+RESULT|T02|PASS|All assertions satisfied
+
+============================================================
+TEST T03 | BASELINE
+EXPECTED: Doctor CRUD succeeds
+------------------------------------------------------------
+Doctor added successfully.
+Doctor updated successfully.
+Doctor deleted successfully.
+RESULT|T03|PASS|All assertions satisfied
+
+============================================================
+TEST T04 | BASELINE
+EXPECTED: Duplicate patient and doctor IDs rejected
+------------------------------------------------------------
+Patient added successfully.
+Observed expected IllegalArgumentException: Patient ID already exists.
+Doctor added successfully.
+Observed expected IllegalArgumentException: Doctor ID already exists.
+RESULT|T04|PASS|All assertions satisfied
+
+============================================================
+TEST T05 | BASELINE
+EXPECTED: Missing patient and doctor raise custom exceptions
+------------------------------------------------------------
+Observed expected PatientNotFoundException: Patient with ID missing not found.
+Observed expected DoctorNotFoundException: Doctor with ID missing not found.
+RESULT|T05|PASS|All assertions satisfied
+
+============================================================
+TEST T06 | BASELINE
+EXPECTED: Booking stores CONFIRMED and normalizes 09:00 to 09:00 AM
+------------------------------------------------------------
+Appointment booked successfully.
+RESULT|T06|PASS|All assertions satisfied
+
+============================================================
+TEST T07 | BASELINE
+EXPECTED: Duplicate appointment ID rejected
+------------------------------------------------------------
+Appointment booked successfully.
+Observed expected IllegalArgumentException: Appointment ID already exists.
+RESULT|T07|PASS|All assertions satisfied
+
+============================================================
+TEST T08 | BASELINE
+EXPECTED: Same doctor/date/time active booking rejected
+------------------------------------------------------------
+Appointment booked successfully.
+Observed expected AppointmentUnavailableException: Doctor is already booked on 2026-11-02 at 09:00 AM.
+RESULT|T08|PASS|All assertions satisfied
+
+============================================================
+TEST T09 | BASELINE
+EXPECTED: Different doctor can use same time
+------------------------------------------------------------
+Appointment booked successfully.
+Appointment booked successfully.
+RESULT|T09|PASS|All assertions satisfied
+
+============================================================
+TEST T10 | BASELINE
+EXPECTED: Invalid calendar date and invalid time rejected
+------------------------------------------------------------
+Observed expected IllegalArgumentException: Invalid date. Use YYYY-MM-DD, for example 2026-10-28.
+Observed expected IllegalArgumentException: Invalid time. Use HH:MM AM/PM or 24-hour HH:MM.
+RESULT|T10|PASS|All assertions satisfied
+
+============================================================
+TEST T11 | BASELINE
+EXPECTED: Blank reason and null patient rejected
+------------------------------------------------------------
+Observed expected IllegalArgumentException: Appointment purpose is required.
+Observed expected IllegalArgumentException: Patient and doctor are required.
+RESULT|T11|PASS|All assertions satisfied
+
+============================================================
+TEST T12 | BASELINE
+EXPECTED: Reschedule sets RESCHEDULED and permits unchanged own slot
+------------------------------------------------------------
+Appointment booked successfully.
+Appointment rescheduled successfully.
+RESULT|T12|PASS|All assertions satisfied
+
+============================================================
+TEST T13 | BASELINE
+EXPECTED: Conflicting reschedule rejected and original time preserved
+------------------------------------------------------------
+Appointment booked successfully.
+Appointment booked successfully.
+Observed expected AppointmentUnavailableException: Doctor is already booked on 2026-11-02 at 10:00 AM.
+RESULT|T13|PASS|All assertions satisfied
+
+============================================================
+TEST T14 | BASELINE
+EXPECTED: Cancelled slot becomes reusable; cancelled record cannot reschedule
+------------------------------------------------------------
+Appointment booked successfully.
+Appointment cancelled successfully.
+Observed expected AppointmentUnavailableException: Cancelled appointment cannot be rescheduled.
+Appointment booked successfully.
+RESULT|T14|PASS|All assertions satisfied
+
+============================================================
+TEST T15 | BASELINE
+EXPECTED: Completed record cannot cancel or reschedule
+------------------------------------------------------------
+Appointment booked successfully.
+Appointment completed successfully.
+Completed appointments cannot be cancelled.
+Observed expected AppointmentUnavailableException: Completed appointment cannot be rescheduled.
+RESULT|T15|PASS|All assertions satisfied
+
+============================================================
+TEST T16 | BASELINE
+EXPECTED: Referenced patient and doctor deletion blocked even after cancellation
+------------------------------------------------------------
+Patient added successfully.
+Doctor added successfully.
+Appointment booked successfully.
+Appointment cancelled successfully.
+Observed expected IllegalStateException: Cannot delete patient because appointment A1 references this patient.
+Observed expected IllegalStateException: Cannot delete doctor because appointment A1 references this doctor.
+RESULT|T16|PASS|All assertions satisfied
+
+============================================================
+TEST T17 | BASELINE
+EXPECTED: Save/load restores fields, relationships and status
+------------------------------------------------------------
+Appointment booked successfully.
+Appointment rescheduled successfully.
+Patients saved successfully.
+Doctors saved successfully.
+Schedules saved successfully.
+Appointments saved successfully.
+Patients loaded successfully.
+Doctors loaded successfully.
+Appointments loaded successfully.
+RESULT|T17|PASS|All assertions satisfied
+
+============================================================
+TEST T18 | BASELINE
+EXPECTED: Orphan appointment row is skipped
+------------------------------------------------------------
+Appointments loaded successfully.
+RESULT|T18|PASS|All assertions satisfied
+
+============================================================
+TEST T19 | BASELINE
+EXPECTED: Person roles and both notification implementations behave correctly
+------------------------------------------------------------
+
+===== EMAIL NOTIFICATION =====
+To: test@example.test
+Message: Test message
+==============================
+
+===== SMS NOTIFICATION =====
+To: 000
+Message: Test message
+============================
+RESULT|T19|PASS|All assertions satisfied
+
+============================================================
+TEST T20 | BASELINE
+EXPECTED: Missing files are tolerated
+------------------------------------------------------------
+RESULT|T20|PASS|All assertions satisfied
+
+============================================================
+TEST T21 | BASELINE
+EXPECTED: Console retries invalid numbers, rejects invalid choices, and saves on exit
+------------------------------------------------------------
+UI fixture: copies of project data files
+Input supplied: abc, 99, 0
+Patients loaded successfully.
+Doctors loaded successfully.
+Patient added successfully.
+Patient added successfully.
+Skipping patient: Patient ID already exists.
+Patient added successfully.
+Patient added successfully.
+Doctor added successfully.
+Doctor added successfully.
+Doctor added successfully.
+Doctor added successfully.
+Doctor added successfully.
+Doctor added successfully.
+Doctor added successfully.
+Doctor added successfully.
+Appointments loaded successfully.
+
+======================================
+   CLINIC APPOINTMENT MANAGEMENT
+======================================
+1. Patient Management
+2. Doctor Management
+3. Appointment Management
+4. Search
+5. Save Data
+6. Notification / Polymorphism Demo
+0. Exit
+Enter choice: Please enter a valid number.
+Enter choice: Invalid choice. Please try again.
+
+======================================
+   CLINIC APPOINTMENT MANAGEMENT
+======================================
+1. Patient Management
+2. Doctor Management
+3. Appointment Management
+4. Search
+5. Save Data
+6. Notification / Polymorphism Demo
+0. Exit
+Enter choice: Patients saved successfully.
+Doctors saved successfully.
+Schedules saved successfully.
+Appointments saved successfully.
+
+Thank you for using Clinic Appointment System.
+RESULT|T21|PASS|All assertions satisfied
+
+============================================================
+TEST G01 | ROBUSTNESS REQUIREMENT
+EXPECTED: Reject age zero at service creation boundary
+------------------------------------------------------------
+Observed expected IllegalArgumentException: Age must be greater than zero.
+RESULT|G01|PASS|All assertions satisfied
+
+============================================================
+TEST G02 | ROBUSTNESS REQUIREMENT
+EXPECTED: Enforce doctor's declared schedule during booking
+------------------------------------------------------------
+Observed expected AppointmentUnavailableException: Doctor has no available schedule on 2026-11-02 at 10:00 PM.
+RESULT|G02|PASS|All assertions satisfied
+
+============================================================
+TEST G03 | ROBUSTNESS REQUIREMENT
+EXPECTED: Persist doctor schedules across save/load
+------------------------------------------------------------
+Doctors saved successfully.
+Schedules saved successfully.
+Doctors loaded successfully.
+RESULT|G03|PASS|All assertions satisfied
+
+============================================================
+TEST G04 | ROBUSTNESS REQUIREMENT
+EXPECTED: Collection getter prevents external mutation
+------------------------------------------------------------
+Patient added successfully.
+RESULT|G04|PASS|All assertions satisfied
+
+============================================================
+TEST G05 | ROBUSTNESS REQUIREMENT
+EXPECTED: Malformed age does not prevent later valid rows from loading
+------------------------------------------------------------
+Skipping invalid patient row: For input string: "oops"
+Patients loaded successfully.
+RESULT|G05|PASS|All assertions satisfied
+
+============================================================
+TEST S01 | BASELINE
+EXPECTED: Weekly shift accepts opening and rejects closing, earlier time, and wrong weekday
+------------------------------------------------------------
+RESULT|S01|PASS|All assertions satisfied
+
+============================================================
+TEST S02 | BASELINE
+EXPECTED: No schedule or unavailable schedule rejects booking
+------------------------------------------------------------
+Observed expected AppointmentUnavailableException: Doctor has no available schedule on 2026-11-02 at 09:00 AM.
+Observed expected AppointmentUnavailableException: Doctor has no available schedule on 2026-11-02 at 09:00 AM.
+RESULT|S02|PASS|All assertions satisfied
+
+============================================================
+TEST S03 | BASELINE
+EXPECTED: Out-of-hours reschedule preserves date, time, and status
+------------------------------------------------------------
+Appointment booked successfully.
+Observed expected AppointmentUnavailableException: Doctor has no available schedule on 2026-11-02 at 10:00 PM.
+RESULT|S03|PASS|All assertions satisfied
+
+============================================================
+TEST S04 | BASELINE
+EXPECTED: Weekly and dated schedules retain ranges and unavailable flags on reload
+------------------------------------------------------------
+Doctors saved successfully.
+Schedules saved successfully.
+Doctors loaded successfully.
+RESULT|S04|PASS|All assertions satisfied
+
+============================================================
+TEST S05 | BASELINE
+EXPECTED: Invalid and orphan schedule rows do not block later valid rows
+------------------------------------------------------------
+Skipping schedule row 1: Text 'oops' could not be parsed at index 0
+Skipping schedule row 2: Unknown doctor.
+Skipping schedule row 3: Availability must be true or false.
+RESULT|S05|PASS|All assertions satisfied
+
+============================================================
+TEST S06 | BASELINE
+EXPECTED: Doctor, appointment, and schedule lists resist external clear
+------------------------------------------------------------
+Doctor added successfully.
+Observed expected UnsupportedOperationException: null
+Appointment booked successfully.
+Observed expected UnsupportedOperationException: null
+Observed expected UnsupportedOperationException: null
+RESULT|S06|PASS|All assertions satisfied
+
+============================================================
+TEST S07 | BASELINE
+EXPECTED: Project schedule data matches all six screenshot rows and leaves two unspecified doctors unscheduled
+------------------------------------------------------------
+RESULT|S07|PASS|All assertions satisfied
+
+============================================================
+TEST S08 | BASELINE
+EXPECTED: Historical appointment restores without schedule and normalizes legacy time
+------------------------------------------------------------
+Observed expected IllegalArgumentException: Invalid or duplicate stored appointment.
+RESULT|S08|PASS|All assertions satisfied
+
+================ FINAL SUMMARY ================
+RESULT|T01|PASS|All assertions satisfied
+RESULT|T02|PASS|All assertions satisfied
+RESULT|T03|PASS|All assertions satisfied
+RESULT|T04|PASS|All assertions satisfied
+RESULT|T05|PASS|All assertions satisfied
+RESULT|T06|PASS|All assertions satisfied
+RESULT|T07|PASS|All assertions satisfied
+RESULT|T08|PASS|All assertions satisfied
+RESULT|T09|PASS|All assertions satisfied
+RESULT|T10|PASS|All assertions satisfied
+RESULT|T11|PASS|All assertions satisfied
+RESULT|T12|PASS|All assertions satisfied
+RESULT|T13|PASS|All assertions satisfied
+RESULT|T14|PASS|All assertions satisfied
+RESULT|T15|PASS|All assertions satisfied
+RESULT|T16|PASS|All assertions satisfied
+RESULT|T17|PASS|All assertions satisfied
+RESULT|T18|PASS|All assertions satisfied
+RESULT|T19|PASS|All assertions satisfied
+RESULT|T20|PASS|All assertions satisfied
+RESULT|T21|PASS|All assertions satisfied
+RESULT|G01|PASS|All assertions satisfied
+RESULT|G02|PASS|All assertions satisfied
+RESULT|G03|PASS|All assertions satisfied
+RESULT|G04|PASS|All assertions satisfied
+RESULT|G05|PASS|All assertions satisfied
+RESULT|S01|PASS|All assertions satisfied
+RESULT|S02|PASS|All assertions satisfied
+RESULT|S03|PASS|All assertions satisfied
+RESULT|S04|PASS|All assertions satisfied
+RESULT|S05|PASS|All assertions satisfied
+RESULT|S06|PASS|All assertions satisfied
+RESULT|S07|PASS|All assertions satisfied
+RESULT|S08|PASS|All assertions satisfied
+TOTAL=34 | PASS=34 | FAIL=0 | BLOCKED=0
+Revised application: all 34 cases should pass. Valid-booking fixtures now declare schedules.
+G01-G05 test desired safeguards; FAIL means the safeguard is missing, not a successful test.
+T01 compiles current source. Other tests execute the classes built by your IDE/terminal.
+Save all source files and rebuild before running so those classes match your source.
+========== END PHASE 5 TEST OUTPUT ==========

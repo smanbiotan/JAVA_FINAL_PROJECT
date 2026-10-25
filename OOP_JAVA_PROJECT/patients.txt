@@ -1,5 +1,18 @@
 PNT-321|Rene Baterbonia|0915151562|test@gmail.com|18|male|butuan city
-PNT-001|Koskie|90184014|exam@gmail.com|19|male|pequeno
-PNT-001|Kato|09151895051|testt@gmail.com|19|Male|Pequeno
 PNT-004|jandoe|09932131244|jandoe@gmail.com|21|Male|Villa
 PNT-005|jandek|0914151516|jandek@gmail.com|20|Female|Ampayon
+PNT-006|Mika Santos|09170000006|patient006@example.com|22|Female|Butuan City
+PNT-007|Noah Reyes|09170000007|patient007@example.com|25|Male|Ampayon
+PNT-008|Ava Cruz|09170000008|patient008@example.com|31|Female|Butuan City
+PNT-009|Liam Garcia|09170000009|patient009@example.com|27|Male|Libertad
+PNT-010|Isla Mendoza|09170000010|patient010@example.com|24|Female|Ampayon
+PNT-011|Ethan Torres|09170000011|patient011@example.com|36|Male|Butuan City
+PNT-012|Mia Flores|09170000012|patient012@example.com|29|Female|Baan
+PNT-013|Lucas Ramos|09170000013|patient013@example.com|42|Male|Ampayon
+PNT-014|Zoe Castillo|09170000014|patient014@example.com|19|Female|Butuan City
+PNT-015|Gabriel Lim|09170000015|patient015@example.com|33|Male|Villa Kananga
+PNT-016|Chloe Dela Cruz|09170000016|patient016@example.com|28|Female|Ampayon
+PNT-017|Daniel Perez|09170000017|patient017@example.com|45|Male|Butuan City
+PNT-018|Sofia Tan|09170000018|patient018@example.com|26|Female|Libertad
+PNT-019|Adrian Flores|09170000019|patient019@example.com|38|Male|Baan
+PNT-020|Amara Villanueva|09170000020|patient020@example.com|23|Female|Ampayon

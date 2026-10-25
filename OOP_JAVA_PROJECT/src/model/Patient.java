@@ -17,7 +17,7 @@ public class Patient extends Person {
 
         super(id, name, phone, email);
 
-        this.age = age;
+        setAge(age);
         this.gender = gender;
         this.address = address;
     }
@@ -39,6 +39,7 @@ public class Patient extends Person {
 
     public void setAge(int age) {
     	
+        if (age <= 0) throw new IllegalArgumentException("Age must be greater than zero.");
         this.age = age;
     }
 
