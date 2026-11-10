@@ -8,7 +8,8 @@ public abstract class Person {
     private String email;
 
     public Person(String id, String name, String phone, String email) {
-        this.id = id;
+        if (id == null || id.trim().isEmpty()) throw new IllegalArgumentException("ID is required.");
+        this.id = id.trim();
         this.name = name;
         this.phone = phone;
         this.email = email;

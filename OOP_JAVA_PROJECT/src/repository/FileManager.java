@@ -181,6 +181,7 @@ public class FileManager {
                     continue;
                 }
 
+                try {
                 Doctor doctor = new Doctor(
                         data[0],
                         data[1],
@@ -190,6 +191,9 @@ public class FileManager {
                 );
 
                 doctors.add(doctor);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Skipping invalid doctor row: " + e.getMessage());
+                }
             }
 
             loadSchedules(doctors);
@@ -288,6 +292,11 @@ public class FileManager {
                         throw new IllegalArgumentException("Availability must be true or false.");
                     Schedule schedule = new Schedule(data[0], data[1], data[2], data[3], data[4]);
                     schedule.setAvailable(Boolean.parseBoolean(data[5]));
+                    // Reject duplicate schedule IDs across the entire loaded doctor list.
+                    for (Doctor owner : doctors) for (Schedule existing : owner.getSchedules()) {
+                        if (existing.getScheduleId().equalsIgnoreCase(schedule.getScheduleId()))
+                            throw new IllegalArgumentException("Schedule ID already exists.");
+                    }
                     doctor.addSchedule(schedule);
                 } catch (IllegalArgumentException | java.time.DateTimeException e) {
                     System.out.println("Skipping schedule row " + row + ": " + e.getMessage());

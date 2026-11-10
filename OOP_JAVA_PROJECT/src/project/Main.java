@@ -19,6 +19,7 @@ public class Main {
 
     public static void main(String[] args) {
 
+        IdGenerator.load();
         loadData();
 
         int choice;
@@ -27,7 +28,7 @@ public class Main {
 
             displayMainMenu();
 
-            choice = readInt("Enter choice: ");
+            choice = readMenuChoice("Enter choice: ");
 
             switch (choice) {
 
@@ -80,6 +81,7 @@ public class Main {
         System.out.println("   CLINIC APPOINTMENT MANAGEMENT");
         System.out.println("======================================");
 
+        System.out.println("Type return at any input prompt to cancel; at menus it acts as 0.");
         System.out.println("1. Patient Management");
         System.out.println("2. Doctor Management");
         System.out.println("3. Appointment Management");
@@ -105,7 +107,7 @@ public class Main {
             System.out.println("4. Delete Patient");
             System.out.println("0. Back");
 
-            choice = readInt("Enter choice: ");
+            choice = readMenuChoice("Enter choice: ");
 
             try {
 
@@ -134,6 +136,8 @@ public class Main {
                         System.out.println("Invalid choice.");
                 }
 
+            } catch (ReturnToMenu e) {
+                System.out.println("Operation cancelled. Returning to the menu.");
             } catch (Exception e) {
 
                 System.out.println("Error: " + e.getMessage());
@@ -142,11 +146,13 @@ public class Main {
         } while (choice != 0);
     }
 
+    // Collect all inputs first; only a completed form inserts a patient.
     private static void addPatient() {
 
         System.out.println("\n===== ADD PATIENT =====");
 
-        String id = readRequiredString("Patient ID: ");
+        String id = patientService.nextId();
+        System.out.println("New patient ID: " + id);
 
         String name = readRequiredString("Name: ");
 
@@ -258,7 +264,7 @@ public class Main {
             System.out.println("6. Add Doctor Schedule");
             System.out.println("0. Back");
 
-            choice = readInt("Enter choice: ");
+            choice = readMenuChoice("Enter choice: ");
 
             try {
 
@@ -289,6 +295,8 @@ public class Main {
                         System.out.println("Invalid choice.");
                 }
 
+            } catch (ReturnToMenu e) {
+                System.out.println("Operation cancelled. Returning to the menu.");
             } catch (Exception e) {
 
                 System.out.println("Error: " + e.getMessage());
@@ -297,11 +305,13 @@ public class Main {
         } while (choice != 0);
     }
 
+    // Only the new doctor ID is generated; existing doctor lookups still prompt.
     private static void addDoctor() {
 
         System.out.println("\n===== ADD DOCTOR =====");
 
-        String id = readRequiredString("Doctor ID: ");
+        String id = doctorService.nextId();
+        System.out.println("New doctor ID: " + id);
 
         String name = readRequiredString("Name: ");
 
@@ -379,13 +389,15 @@ public class Main {
         }
     }
 
+    // Doctor ID selects an existing owner; the new schedule ID is generated globally.
     private static void addSchedule() throws DoctorNotFoundException {
         Doctor doctor = doctorService.findDoctorById(readRequiredString("Doctor ID: "));
-        String id = readRequiredString("Schedule ID (unique for doctor): ");
+        String id = doctorService.nextScheduleId();
+        System.out.println("New schedule ID: " + id);
         String day = readRequiredString("Weekday (e.g. MONDAY) or date (YYYY-MM-DD): ");
         String start = readRequiredString("Start time (e.g. 8:00 AM): ");
         String end = readRequiredString("End time (exclusive; same as start for a single slot): ");
-        doctor.addSchedule(new Schedule(id, doctor.getId(), day, start, end));
+        doctorService.addSchedule(doctor.getId(), new Schedule(id, doctor.getId(), day, start, end));
         System.out.println("Schedule added. Save Data or exit normally to save.");
     }
 
@@ -406,7 +418,7 @@ public class Main {
             System.out.println("5. Complete Appointment");
             System.out.println("0. Back");
 
-            choice = readInt("Enter choice: ");
+            choice = readMenuChoice("Enter choice: ");
 
             try {
 
@@ -439,6 +451,8 @@ public class Main {
                         System.out.println("Invalid choice.");
                 }
 
+            } catch (ReturnToMenu e) {
+                System.out.println("Operation cancelled. Returning to the menu.");
             } catch (Exception e) {
 
                 System.out.println("Error: " + e.getMessage());
@@ -447,6 +461,7 @@ public class Main {
         } while (choice != 0);
     }
 
+    // Generate the booking ID while retaining patient/doctor selection by ID.
     private static void bookAppointment()
             throws PatientNotFoundException,
             DoctorNotFoundException,
@@ -454,7 +469,8 @@ public class Main {
 
         System.out.println("\n===== BOOK APPOINTMENT =====");
 
-        String appointmentId = readRequiredString("Appointment ID: ");
+        String appointmentId = appointmentService.nextId();
+        System.out.println("New appointment ID: " + appointmentId);
 
         String patientId = readRequiredString("Patient ID: ");
 
@@ -503,9 +519,9 @@ public class Main {
 
         String id = readRequiredString("Appointment ID: ");
 
-        String date = readRequiredString("New date: ");
+        String date = readRequiredString("New date (YYYY-MM-DD): ");
 
-        String time = readRequiredString("New time: ");
+        String time = readRequiredString("New time (HH:MM AM/PM): ");
 
         appointmentService.rescheduleAppointment(
                 id,
@@ -535,68 +551,73 @@ public class Main {
 
     private static void searchMenu() {
 
-        System.out.println("\n========== SEARCH ==========");
+        int choice;
+        do {
+            System.out.println("\n========== SEARCH ==========");
 
-        System.out.println("1. Search Patient");
-        System.out.println("2. Search Doctor");
-        System.out.println("3. Search Appointment");
-        System.out.println("0. Back");
+            System.out.println("1. Search Patient");
+            System.out.println("2. Search Doctor");
+            System.out.println("3. Search Appointment");
+            System.out.println("0. Back");
 
-        int choice = readInt("Enter choice: ");
+            choice = readMenuChoice("Enter choice: ");
 
-        try {
+            try {
 
-            switch (choice) {
+                switch (choice) {
 
-                case 1:
+                    case 1:
 
-                    String patientId = readRequiredString("Patient ID: ");
+                        String patientId = readRequiredString("Patient ID: ");
 
-                    Patient patient = patientService.findPatientById(patientId);
+                        Patient patient = patientService.findPatientById(patientId);
 
-                    System.out.println("\n" + patient);
+                        System.out.println("\n" + patient);
 
-                    break;
+                        break;
 
-                case 2:
+                    case 2:
 
-                    String doctorId = readRequiredString("Doctor ID: ");
+                        String doctorId = readRequiredString("Doctor ID: ");
 
-                    Doctor doctor = doctorService.findDoctorById(doctorId);
+                        Doctor doctor = doctorService.findDoctorById(doctorId);
 
-                    System.out.println("\n" + doctor);
+                        System.out.println("\n" + doctor);
 
-                    break;
+                        break;
 
-                case 3:
+                    case 3:
 
-                    String appointmentId = readRequiredString("Appointment ID: ");
+                        String appointmentId = readRequiredString("Appointment ID: ");
 
-                    Appointment appointment = appointmentService.findAppointmentById(appointmentId);
+                        Appointment appointment = appointmentService.findAppointmentById(appointmentId);
 
-                    if (appointment == null) {
+                        if (appointment == null) {
 
-                        System.out.println("Appointment not found.");
+                            System.out.println("Appointment not found.");
 
-                    } else {
+                        } else {
 
-                        System.out.println(appointment);
-                    }
+                            System.out.println(appointment);
+                        }
 
-                    break;
+                        break;
 
-                case 0:
-                    break;
+                    case 0:
+                        break;
 
-                default:
+                    default:
 
-                    System.out.println("Invalid choice.");
+                        System.out.println("Invalid choice.");
+                }
+
+            } catch (ReturnToMenu e) {
+                    System.out.println("Operation cancelled. Returning to the menu.");
+                } catch (Exception e) {
+
+                System.out.println("Error: " + e.getMessage());
             }
-
-        } catch (Exception e) {
-
-            System.out.println("Error: " + e.getMessage());
-        }
+        } while (choice != 0);
     }
 
     // SAVE DATA
@@ -608,6 +629,7 @@ public class Main {
         FileManager.saveDoctors(doctorService.getAllDoctors());
 
         FileManager.saveAppointments(appointmentService.getAllAppointments());
+        IdGenerator.save();
     }
 
     // LOAD DATA
@@ -657,38 +679,39 @@ public class Main {
         notification.send("09932815819/09562440212", "Your clinic appointment " + "has been confirmed.");
     }
 
-    // INPUT VALIDATION
+    // INPUT AND NAVIGATION: all form fields go through these helpers.
+    // No operation changes records until every required input has been collected.
+    private static class ReturnToMenu extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+    }
+
+    private static String readInput(String message) {
+        System.out.print(message);
+        // End-of-input also unwinds a form; at the next menu it triggers normal exit.
+        if (!scanner.hasNextLine()) throw new ReturnToMenu();
+        String input = scanner.nextLine().trim();
+        if (input.equalsIgnoreCase("return")) throw new ReturnToMenu();
+        return input;
+    }
 
     private static String readRequiredString(String message) {
-
         while (true) {
-
-            System.out.print(message);
-
-            String input = scanner.nextLine().trim();
-
-            if (!input.isEmpty()) {
-                return input;
-            }
-
+            String input = readInput(message);
+            if (!input.isEmpty()) return input;
             System.out.println("Input cannot be empty.");
         }
     }
 
     private static int readInt(String message) {
-
         while (true) {
-
-            try {
-
-                System.out.print(message);
-
-                return Integer.parseInt(scanner.nextLine().trim());
-
-            } catch (NumberFormatException e) {
-
-                System.out.println("Please enter a valid number.");
-            }
+            try { return Integer.parseInt(readInput(message)); }
+            catch (NumberFormatException e) { System.out.println("Please enter a valid number."); }
         }
+    }
+
+    // At submenu selections return means Back; at the main menu it means Save/Exit.
+    private static int readMenuChoice(String message) {
+        try { return readInt(message); }
+        catch (ReturnToMenu e) { return 0; }
     }
 }

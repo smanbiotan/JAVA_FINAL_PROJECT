@@ -18,7 +18,7 @@ public class Appointment {
             String time,
             String reason) {
 
-        this.appointmentId = appointmentId;
+        this.appointmentId = appointmentId == null ? null : appointmentId.trim();
         this.patient = patient;
         this.doctor = doctor;
         this.date = date;

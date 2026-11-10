@@ -15,7 +15,14 @@ public class DoctorService {
         doctors = new ArrayList<>();
     }
 
-    // CREATE
+    // AUTO ID: inspect existing records as well as the saved high-water mark.
+    public String nextId() {
+        for (Doctor item : doctors) IdGenerator.observe(item.getId());
+        return IdGenerator.next("DOC-");
+    }
+
+    // CREATE: reject duplicates even when called outside the console.
+
     public void addDoctor(Doctor doctor) {
         if (doctor == null) {
             throw new IllegalArgumentException("Doctor cannot be null.");
@@ -25,8 +32,33 @@ public class DoctorService {
             throw new IllegalArgumentException("Doctor ID already exists.");
         }
 
+        // Validate attached schedule IDs before inserting a doctor loaded or created elsewhere.
+        for (model.Schedule schedule : doctor.getSchedules()) {
+            for (Doctor existingDoctor : doctors) for (model.Schedule existing : existingDoctor.getSchedules())
+                if (existing.getScheduleId().equalsIgnoreCase(schedule.getScheduleId()))
+                    throw new IllegalArgumentException("Schedule ID already exists.");
+        }
         doctors.add(doctor);
+        for (model.Schedule schedule : doctor.getSchedules()) IdGenerator.observe(schedule.getScheduleId());
+        IdGenerator.observe(doctor.getId());
         System.out.println("Doctor added successfully.");
+    }
+
+    // Schedule IDs are unique across all doctors, not just one doctor's list.
+    public String nextScheduleId() {
+        for (Doctor doctor : doctors) for (model.Schedule schedule : doctor.getSchedules())
+            IdGenerator.observe(schedule.getScheduleId());
+        return IdGenerator.next("SCH-");
+    }
+
+    public void addSchedule(String doctorId, model.Schedule schedule) throws DoctorNotFoundException {
+        if (schedule == null) throw new IllegalArgumentException("Schedule is required.");
+        for (Doctor doctor : doctors) for (model.Schedule existing : doctor.getSchedules()) {
+            if (existing.getScheduleId().equalsIgnoreCase(schedule.getScheduleId().trim()))
+                throw new IllegalArgumentException("Schedule ID already exists.");
+        }
+        findDoctorById(doctorId).addSchedule(schedule);
+        IdGenerator.observe(schedule.getScheduleId());
     }
 
     // READ

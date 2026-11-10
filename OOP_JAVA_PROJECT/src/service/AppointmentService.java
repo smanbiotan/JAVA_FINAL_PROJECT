@@ -36,6 +36,12 @@ public class AppointmentService {
         appointments = new ArrayList<>();
     }
 
+    // AUTO ID: includes historical, cancelled and completed appointments.
+    public String nextId() {
+        for (Appointment appointment : appointments) IdGenerator.observe(appointment.getAppointmentId());
+        return IdGenerator.next("APT-");
+    }
+
     // CREATE
     public void bookAppointment(
             String appointmentId,
@@ -77,6 +83,7 @@ public class AppointmentService {
                 reason.trim());
 
         appointments.add(appointment);
+        IdGenerator.observe(appointment.getAppointmentId());
 
         System.out.println("Appointment booked successfully.");
     }
@@ -228,6 +235,7 @@ public class AppointmentService {
             throw new IllegalArgumentException("Invalid stored appointment status.");
         appointment.setDate(date); appointment.setTime(time);
         appointments.add(appointment);
+        IdGenerator.observe(appointment.getAppointmentId());
     }
 
     // CHECK DOCTOR AVAILABILITY

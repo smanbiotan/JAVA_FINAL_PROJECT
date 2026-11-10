@@ -16,7 +16,14 @@ public class PatientService {
         patients = new ArrayList<>();
     }
 
-    // CREATE
+    // AUTO ID: inspect existing records as well as the saved high-water mark.
+    public String nextId() {
+        for (Patient item : patients) IdGenerator.observe(item.getId());
+        return IdGenerator.next("PNT-");
+    }
+
+    // CREATE: reject duplicates even when called outside the console.
+
     public void addPatient(Patient patient) {
  
         if (patient == null) {
@@ -32,6 +39,7 @@ public class PatientService {
         }
 
         patients.add(patient);
+        IdGenerator.observe(patient.getId());
         System.out.println("Patient added successfully.");
     }
 
